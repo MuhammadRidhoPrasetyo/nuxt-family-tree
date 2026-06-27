@@ -1,0 +1,9 @@
+.nuxt
+.output
+.data
+.bun
+tmp
+node_modules
+dist
+.env
+*.local
