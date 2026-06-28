@@ -12,6 +12,7 @@ type Family = {
   visibility: 'PRIVATE' | 'INVITE_ONLY' | 'PUBLIC'
   createdAt: string
   updatedAt: string
+  isShared: boolean
 }
 
 const toast = useToast()
@@ -101,6 +102,9 @@ const deleteFamily = async (family: Family) => {
                 <UBadge variant="subtle">
                   {{ visibilityLabel[family.visibility] }}
                 </UBadge>
+                <UBadge v-if="family.isShared" variant="subtle" color="primary">
+                  Shared
+                </UBadge>
               </div>
               <p class="mt-1 text-sm text-muted group-hover:text-primary/70 transition-colors">
                 /{{ family.slug }}
@@ -115,10 +119,17 @@ const deleteFamily = async (family: Family) => {
             <UButton :to="`/families/${family.id}`" icon="i-lucide-eye" color="primary" variant="subtle">
               Lihat Tree
             </UButton>
-            <UButton :to="`/families/${family.id}/settings`" icon="i-lucide-settings" color="neutral" variant="outline">
+            <UButton 
+              v-if="!family.isShared"
+              :to="`/families/${family.id}/settings`" 
+              icon="i-lucide-settings" 
+              color="neutral" 
+              variant="outline"
+            >
               Pengaturan
             </UButton>
             <UButton
+              v-if="!family.isShared"
               icon="i-lucide-trash-2"
               color="error"
               variant="outline"

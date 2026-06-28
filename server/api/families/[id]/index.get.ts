@@ -1,5 +1,5 @@
-import { and, eq, isNull } from 'drizzle-orm'
-import { families } from '../../../database/schema'
+import { and, eq, isNull, or } from 'drizzle-orm'
+import { families, familyUserRoles } from '../../../database/schema'
 import { db } from '../../../utils/db'
 import { requireCurrentUser } from '../../../utils/session'
 
@@ -12,11 +12,24 @@ export default defineEventHandler(async (event) => {
   }
 
   const [family] = await db
-    .select()
+    .select({
+      id: families.id,
+      name: families.name,
+      slug: families.slug,
+      description: families.description,
+      visibility: families.visibility,
+      ownerUserId: families.ownerUserId,
+      createdAt: families.createdAt,
+      updatedAt: families.updatedAt
+    })
     .from(families)
+    .leftJoin(familyUserRoles, eq(families.id, familyUserRoles.familyId))
     .where(and(
       eq(families.id, id),
-      eq(families.ownerUserId, user.id),
+      or(
+        eq(families.ownerUserId, user.id),
+        eq(familyUserRoles.userId, user.id)
+      ),
       isNull(families.deletedAt)
     ))
     .limit(1)

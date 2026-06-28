@@ -15,6 +15,13 @@
       "when": 1782566865445,
       "tag": "0001_careful_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782599122539,
+      "tag": "0002_special_makkari",
+      "breakpoints": true
     }
   ]
 }

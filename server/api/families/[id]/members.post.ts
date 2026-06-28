@@ -3,6 +3,7 @@ import { familyMembers, familyUserRoles } from '../../../database/schema'
 import { db } from '../../../utils/db'
 import { requireCurrentUser } from '../../../utils/session'
 import { eq, and } from 'drizzle-orm'
+import { logAction } from '../../../utils/audit'
 
 const CreateMemberSchema = z.object({
   fullName: z.string().trim().min(2).max(150),
@@ -93,6 +94,15 @@ export default defineEventHandler(async (event) => {
       message: 'Gagal menambahkan anggota keluarga.'
     })
   }
+
+  await logAction(event, {
+    userId: user.id,
+    familyId,
+    action: 'CREATE_MEMBER',
+    tableName: 'family_members',
+    recordId: member.id,
+    newValue: member
+  })
 
   return { member }
 })

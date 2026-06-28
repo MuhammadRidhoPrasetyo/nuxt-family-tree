@@ -9,12 +9,21 @@ const authClient = useAuthClient()
 const toast = useToast()
 const sendingVerification = ref(false)
 
-const stats = [
-  { label: 'Family tree', value: '0', icon: 'i-lucide-git-fork' },
-  { label: 'Anggota', value: '0', icon: 'i-lucide-users' },
-  { label: 'Undangan aktif', value: '0', icon: 'i-lucide-send' },
-  { label: 'Media', value: '0', icon: 'i-lucide-images' }
-]
+const { data: statsData } = await useFetch<{
+  familiesCount: number
+  membersCount: number
+  invitationsCount: number
+  mediaCount: number
+}>('/api/dashboard/stats', {
+  credentials: 'include'
+})
+
+const stats = computed(() => [
+  { label: 'Family tree', value: statsData.value?.familiesCount ?? 0, icon: 'i-lucide-git-fork' },
+  { label: 'Anggota', value: statsData.value?.membersCount ?? 0, icon: 'i-lucide-users' },
+  { label: 'Undangan aktif', value: statsData.value?.invitationsCount ?? 0, icon: 'i-lucide-send' },
+  { label: 'Media', value: statsData.value?.mediaCount ?? 0, icon: 'i-lucide-images' }
+])
 
 const sendVerification = async () => {
   if (!currentUser.value?.email) {

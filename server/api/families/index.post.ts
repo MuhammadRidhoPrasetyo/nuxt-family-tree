@@ -1,7 +1,8 @@
 import { z } from 'zod'
-import { families, familyUserRoles } from '../../database/schema'
+import { families, familyUserRoles, privacySettings } from '../../database/schema'
 import { db } from '../../utils/db'
 import { requireCurrentUser } from '../../utils/session'
+import { eq } from 'drizzle-orm'
 
 const CreateFamilySchema = z.object({
   name: z.string().trim().min(2).max(150),
@@ -37,6 +38,10 @@ export default defineEventHandler(async (event) => {
     familyId: family.id,
     userId: user.id,
     role: 'OWNER'
+  })
+
+  await db.insert(privacySettings).values({
+    familyId: family.id
   })
 
   return { family }

@@ -3,6 +3,7 @@ import { familyMembers, familyUserRoles } from '../../../../database/schema'
 import { db } from '../../../../utils/db'
 import { requireCurrentUser } from '../../../../utils/session'
 import { eq, and } from 'drizzle-orm'
+import { logAction } from '../../../../utils/audit'
 
 const UpdateMemberSchema = z.object({
   fullName: z.string().trim().min(2).max(150),
@@ -61,6 +62,17 @@ export default defineEventHandler(async (event) => {
 
   const body = await readValidatedBody(event, (data) => UpdateMemberSchema.parse(data))
 
+  const [oldMember] = await db
+    .select()
+    .from(familyMembers)
+    .where(
+      and(
+        eq(familyMembers.id, memberId),
+        eq(familyMembers.familyId, familyId)
+      )
+    )
+    .limit(1)
+
   const [member] = await db
     .update(familyMembers)
     .set({
@@ -99,6 +111,16 @@ export default defineEventHandler(async (event) => {
       message: 'Anggota keluarga tidak ditemukan.'
     })
   }
+
+  await logAction(event, {
+    userId: user.id,
+    familyId,
+    action: 'UPDATE_MEMBER',
+    tableName: 'family_members',
+    recordId: member.id,
+    oldValue: oldMember,
+    newValue: member
+  })
 
   return { member }
 })

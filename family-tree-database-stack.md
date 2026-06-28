@@ -2,16 +2,16 @@
 
 ## Tech Stack
 
-| Layer | Stack |
-|---|---|
-| Runtime | Bun |
-| Frontend | Nuxt 4 |
-| Database ORM | Drizzle ORM |
-| Validation | Zod |
-| Authentication | Better Auth |
-| Diagram / Family Tree UI | Vue Flow |
-| Database | PostgreSQL / MySQL recommended |
-| Deployment | VPS / Docker / Coolify / Railway / Render |
+| Layer                    | Stack                                     |
+| ------------------------ | ----------------------------------------- |
+| Runtime                  | Bun                                       |
+| Frontend                 | Nuxt 4                                    |
+| Database ORM             | Drizzle ORM                               |
+| Validation               | Zod                                       |
+| Authentication           | Better Auth                               |
+| Diagram / Family Tree UI | Vue Flow                                  |
+| Database                 | PostgreSQL / MySQL recommended            |
+| Deployment               | VPS / Docker / Coolify / Railway / Render |
 
 ---
 
@@ -61,17 +61,17 @@ users
 
 Digunakan untuk akun pengguna. Integrasi utama dikelola oleh **Better Auth**.
 
-| Field | Type | Description |
-|---|---|---|
-| id | varchar / uuid | Primary key |
-| name | varchar | Nama pengguna |
-| email | varchar | Email unik |
-| email_verified | boolean | Status verifikasi email |
-| image | text | Foto profil |
-| role | enum | USER, ADMIN, SUPER_ADMIN |
-| status | enum | ACTIVE, SUSPENDED, DELETED |
-| created_at | timestamp | Waktu dibuat |
-| updated_at | timestamp | Waktu diperbarui |
+| Field          | Type           | Description                |
+| -------------- | -------------- | -------------------------- |
+| id             | varchar / uuid | Primary key                |
+| name           | varchar        | Nama pengguna              |
+| email          | varchar        | Email unik                 |
+| email_verified | boolean        | Status verifikasi email    |
+| image          | text           | Foto profil                |
+| role           | enum           | USER, ADMIN, SUPER_ADMIN   |
+| status         | enum           | ACTIVE, SUSPENDED, DELETED |
+| created_at     | timestamp      | Waktu dibuat               |
+| updated_at     | timestamp      | Waktu diperbarui           |
 
 > Catatan: Better Auth biasanya memiliki struktur tabel sendiri untuk user, session, account, dan verification. Field tambahan seperti `role` dan `status` dapat ditambahkan sesuai kebutuhan aplikasi.
 
@@ -81,17 +81,17 @@ Digunakan untuk akun pengguna. Integrasi utama dikelola oleh **Better Auth**.
 
 Menyimpan data family tree.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| owner_user_id | uuid / varchar | Pemilik family tree |
-| name | varchar | Nama family tree |
-| slug | varchar | URL unik |
-| description | text | Deskripsi |
-| visibility | enum | PRIVATE, INVITE_ONLY, PUBLIC |
-| created_at | timestamp | Waktu dibuat |
-| updated_at | timestamp | Waktu diperbarui |
-| deleted_at | timestamp nullable | Soft delete |
+| Field         | Type               | Description                  |
+| ------------- | ------------------ | ---------------------------- |
+| id            | uuid / bigint      | Primary key                  |
+| owner_user_id | uuid / varchar     | Pemilik family tree          |
+| name          | varchar            | Nama family tree             |
+| slug          | varchar            | URL unik                     |
+| description   | text               | Deskripsi                    |
+| visibility    | enum               | PRIVATE, INVITE_ONLY, PUBLIC |
+| created_at    | timestamp          | Waktu dibuat                 |
+| updated_at    | timestamp          | Waktu diperbarui             |
+| deleted_at    | timestamp nullable | Soft delete                  |
 
 ### Index
 
@@ -107,34 +107,36 @@ INDEX(visibility)
 
 Menyimpan data individu dalam family tree.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| family_id | uuid / bigint | Relasi ke families |
-| full_name | varchar | Nama lengkap |
-| nickname | varchar nullable | Nama panggilan |
-| gender | enum | MALE, FEMALE, UNKNOWN |
-| birth_place | varchar nullable | Tempat lahir |
-| birth_date | date nullable | Tanggal lahir |
-| birth_date_precision | enum | FULL, YEAR_MONTH, YEAR, UNKNOWN |
-| is_alive | boolean | Status hidup |
-| death_date | date nullable | Tanggal wafat |
-| death_place | varchar nullable | Tempat wafat |
-| death_date_precision | enum | FULL, YEAR_MONTH, YEAR, UNKNOWN |
-| occupation | varchar nullable | Pekerjaan |
-| education | varchar nullable | Pendidikan |
-| religion | varchar nullable | Agama |
-| phone | varchar nullable | Nomor telepon |
-| email | varchar nullable | Email |
-| address | text nullable | Alamat |
-| bio | text nullable | Biografi |
-| notes_private | text nullable | Catatan privat |
-| photo_url | text nullable | Foto utama |
-| created_by | uuid / varchar nullable | User pembuat |
-| updated_by | uuid / varchar nullable | User terakhir mengubah |
-| created_at | timestamp | Waktu dibuat |
-| updated_at | timestamp | Waktu diperbarui |
-| deleted_at | timestamp nullable | Soft delete |
+| Field                | Type                    | Description                     |
+| -------------------- | ----------------------- | ------------------------------- |
+| id                   | uuid / bigint           | Primary key                     |
+| family_id            | uuid / bigint           | Relasi ke families              |
+| full_name            | varchar                 | Nama lengkap                    |
+| nickname             | varchar nullable        | Nama panggilan                  |
+| gender               | enum                    | MALE, FEMALE, UNKNOWN           |
+| birth_place          | varchar nullable        | Tempat lahir                    |
+| birth_date           | date nullable           | Tanggal lahir                   |
+| birth_date_precision | enum                    | FULL, YEAR_MONTH, YEAR, UNKNOWN |
+| is_alive             | boolean                 | Status hidup                    |
+| death_date           | date nullable           | Tanggal wafat                   |
+| death_place          | varchar nullable        | Tempat wafat                    |
+| death_date_precision | enum                    | FULL, YEAR_MONTH, YEAR, UNKNOWN |
+| occupation           | varchar nullable        | Pekerjaan                       |
+| education            | varchar nullable        | Pendidikan                      |
+| religion             | varchar nullable        | Agama                           |
+| phone                | varchar nullable        | Nomor telepon                   |
+| email                | varchar nullable        | Email                           |
+| address              | text nullable           | Alamat                          |
+| bio                  | text nullable           | Biografi                        |
+| notes_private        | text nullable           | Catatan privat                  |
+| photo_url            | text nullable           | Foto utama                      |
+| position_x           | integer nullable        | Koordinat X posisi node         |
+| position_y           | integer nullable        | Koordinat Y posisi node         |
+| created_by           | uuid / varchar nullable | User pembuat                    |
+| updated_by           | uuid / varchar nullable | User terakhir mengubah          |
+| created_at           | timestamp               | Waktu dibuat                    |
+| updated_at           | timestamp               | Waktu diperbarui                |
+| deleted_at           | timestamp nullable      | Soft delete                     |
 
 ### Index
 
@@ -151,15 +153,15 @@ INDEX(birth_date)
 
 Menyimpan hubungan orang tua dan anak. Tabel ini membuat jumlah anak tidak terbatas.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| family_id | uuid / bigint | Relasi ke families |
-| parent_id | uuid / bigint | Relasi ke family_members |
-| child_id | uuid / bigint | Relasi ke family_members |
-| relation_type | enum | BIOLOGICAL, ADOPTED, STEP, FOSTER, UNKNOWN |
-| parent_role | enum | FATHER, MOTHER, PARENT, GUARDIAN |
-| created_at | timestamp | Waktu dibuat |
+| Field         | Type          | Description                                |
+| ------------- | ------------- | ------------------------------------------ |
+| id            | uuid / bigint | Primary key                                |
+| family_id     | uuid / bigint | Relasi ke families                         |
+| parent_id     | uuid / bigint | Relasi ke family_members                   |
+| child_id      | uuid / bigint | Relasi ke family_members                   |
+| relation_type | enum          | BIOLOGICAL, ADOPTED, STEP, FOSTER, UNKNOWN |
+| parent_role   | enum          | FATHER, MOTHER, PARENT, GUARDIAN           |
+| created_at    | timestamp     | Waktu dibuat                               |
 
 ### Constraint
 
@@ -182,19 +184,19 @@ INDEX(child_id)
 
 Menyimpan hubungan pasangan dan riwayat pernikahan.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| family_id | uuid / bigint | Relasi ke families |
-| partner_1_id | uuid / bigint | Pasangan pertama |
-| partner_2_id | uuid / bigint | Pasangan kedua |
-| marriage_date | date nullable | Tanggal menikah |
-| marriage_place | varchar nullable | Tempat menikah |
-| status | enum | MARRIED, DIVORCED, WIDOWED, SEPARATED, UNKNOWN |
-| ended_at | date nullable | Tanggal selesai relasi |
-| notes | text nullable | Catatan |
-| created_at | timestamp | Waktu dibuat |
-| updated_at | timestamp | Waktu diperbarui |
+| Field          | Type             | Description                                    |
+| -------------- | ---------------- | ---------------------------------------------- |
+| id             | uuid / bigint    | Primary key                                    |
+| family_id      | uuid / bigint    | Relasi ke families                             |
+| partner_1_id   | uuid / bigint    | Pasangan pertama                               |
+| partner_2_id   | uuid / bigint    | Pasangan kedua                                 |
+| marriage_date  | date nullable    | Tanggal menikah                                |
+| marriage_place | varchar nullable | Tempat menikah                                 |
+| status         | enum             | MARRIED, DIVORCED, WIDOWED, SEPARATED, UNKNOWN |
+| ended_at       | date nullable    | Tanggal selesai relasi                         |
+| notes          | text nullable    | Catatan                                        |
+| created_at     | timestamp        | Waktu dibuat                                   |
+| updated_at     | timestamp        | Waktu diperbarui                               |
 
 ### Constraint
 
@@ -216,13 +218,13 @@ INDEX(partner_2_id)
 
 Mengatur akses pengguna terhadap sebuah family tree.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| family_id | uuid / bigint | Relasi ke families |
-| user_id | uuid / varchar | Relasi ke users |
-| role | enum | OWNER, ADMIN, EDITOR, VIEWER |
-| created_at | timestamp | Waktu dibuat |
+| Field      | Type           | Description                  |
+| ---------- | -------------- | ---------------------------- |
+| id         | uuid / bigint  | Primary key                  |
+| family_id  | uuid / bigint  | Relasi ke families           |
+| user_id    | uuid / varchar | Relasi ke users              |
+| role       | enum           | OWNER, ADMIN, EDITOR, VIEWER |
+| created_at | timestamp      | Waktu dibuat                 |
 
 ### Constraint
 
@@ -236,17 +238,17 @@ UNIQUE(family_id, user_id)
 
 Menyimpan undangan untuk bergabung ke family tree.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| family_id | uuid / bigint | Relasi ke families |
-| email | varchar | Email undangan |
-| token | varchar | Token undangan |
-| role | enum | EDITOR, VIEWER |
-| invited_by | uuid / varchar | User pengundang |
-| expired_at | timestamp | Waktu kedaluwarsa |
-| accepted_at | timestamp nullable | Waktu diterima |
-| created_at | timestamp | Waktu dibuat |
+| Field       | Type               | Description        |
+| ----------- | ------------------ | ------------------ |
+| id          | uuid / bigint      | Primary key        |
+| family_id   | uuid / bigint      | Relasi ke families |
+| email       | varchar            | Email undangan     |
+| token       | varchar            | Token undangan     |
+| role        | enum               | EDITOR, VIEWER     |
+| invited_by  | uuid / varchar     | User pengundang    |
+| expired_at  | timestamp          | Waktu kedaluwarsa  |
+| accepted_at | timestamp nullable | Waktu diterima     |
+| created_at  | timestamp          | Waktu dibuat       |
 
 ### Index
 
@@ -262,18 +264,18 @@ INDEX(family_id)
 
 Mengatur privasi family tree.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| family_id | uuid / bigint | Relasi ke families |
-| show_living_people | boolean | Menampilkan orang yang masih hidup |
-| show_birth_date | boolean | Menampilkan tanggal lahir |
-| show_death_date | boolean | Menampilkan tanggal wafat |
-| show_contact | boolean | Menampilkan kontak |
-| allow_export | boolean | Mengizinkan ekspor data |
-| allow_guest_view | boolean | Mengizinkan tamu melihat |
-| created_at | timestamp | Waktu dibuat |
-| updated_at | timestamp | Waktu diperbarui |
+| Field              | Type          | Description                        |
+| ------------------ | ------------- | ---------------------------------- |
+| id                 | uuid / bigint | Primary key                        |
+| family_id          | uuid / bigint | Relasi ke families                 |
+| show_living_people | boolean       | Menampilkan orang yang masih hidup |
+| show_birth_date    | boolean       | Menampilkan tanggal lahir          |
+| show_death_date    | boolean       | Menampilkan tanggal wafat          |
+| show_contact       | boolean       | Menampilkan kontak                 |
+| allow_export       | boolean       | Mengizinkan ekspor data            |
+| allow_guest_view   | boolean       | Mengizinkan tamu melihat           |
+| created_at         | timestamp     | Waktu dibuat                       |
+| updated_at         | timestamp     | Waktu diperbarui                   |
 
 ---
 
@@ -281,18 +283,18 @@ Mengatur privasi family tree.
 
 Menyimpan foto dan dokumen anggota keluarga.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| family_id | uuid / bigint | Relasi ke families |
-| family_member_id | uuid / bigint nullable | Relasi ke family_members |
-| file_name | varchar | Nama file |
-| file_path | text | Path file |
-| mime_type | varchar | MIME type |
-| file_size | bigint | Ukuran file |
-| media_type | enum | PHOTO, DOCUMENT, VIDEO, OTHER |
-| uploaded_by | uuid / varchar | User pengunggah |
-| created_at | timestamp | Waktu dibuat |
+| Field            | Type                   | Description                   |
+| ---------------- | ---------------------- | ----------------------------- |
+| id               | uuid / bigint          | Primary key                   |
+| family_id        | uuid / bigint          | Relasi ke families            |
+| family_member_id | uuid / bigint nullable | Relasi ke family_members      |
+| file_name        | varchar                | Nama file                     |
+| file_path        | text                   | Path file                     |
+| mime_type        | varchar                | MIME type                     |
+| file_size        | bigint                 | Ukuran file                   |
+| media_type       | enum                   | PHOTO, DOCUMENT, VIDEO, OTHER |
+| uploaded_by      | uuid / varchar         | User pengunggah               |
+| created_at       | timestamp              | Waktu dibuat                  |
 
 ### Index
 
@@ -308,20 +310,20 @@ INDEX(uploaded_by)
 
 Menyimpan data donasi.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| user_id | uuid / varchar nullable | User pendonasi |
-| family_id | uuid / bigint nullable | Family tree terkait |
-| donor_name | varchar nullable | Nama pendonasi |
-| donor_email | varchar nullable | Email pendonasi |
-| amount | decimal | Nominal |
-| currency | varchar | Mata uang, default IDR |
-| payment_provider | varchar | Provider pembayaran |
-| payment_reference | varchar | Referensi pembayaran |
-| status | enum | PENDING, PAID, FAILED, REFUNDED |
-| paid_at | timestamp nullable | Waktu pembayaran sukses |
-| created_at | timestamp | Waktu dibuat |
+| Field             | Type                    | Description                     |
+| ----------------- | ----------------------- | ------------------------------- |
+| id                | uuid / bigint           | Primary key                     |
+| user_id           | uuid / varchar nullable | User pendonasi                  |
+| family_id         | uuid / bigint nullable  | Family tree terkait             |
+| donor_name        | varchar nullable        | Nama pendonasi                  |
+| donor_email       | varchar nullable        | Email pendonasi                 |
+| amount            | decimal                 | Nominal                         |
+| currency          | varchar                 | Mata uang, default IDR          |
+| payment_provider  | varchar                 | Provider pembayaran             |
+| payment_reference | varchar                 | Referensi pembayaran            |
+| status            | enum                    | PENDING, PAID, FAILED, REFUNDED |
+| paid_at           | timestamp nullable      | Waktu pembayaran sukses         |
+| created_at        | timestamp               | Waktu dibuat                    |
 
 ---
 
@@ -329,19 +331,19 @@ Menyimpan data donasi.
 
 Menyimpan riwayat perubahan data penting.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid / bigint | Primary key |
-| user_id | uuid / varchar nullable | User pelaku |
-| family_id | uuid / bigint nullable | Family tree terkait |
-| action | varchar | CREATE, UPDATE, DELETE, LOGIN, EXPORT |
-| table_name | varchar | Nama tabel |
-| record_id | varchar | ID record |
-| old_value | json nullable | Data lama |
-| new_value | json nullable | Data baru |
-| ip_address | varchar nullable | IP address |
-| user_agent | text nullable | User agent |
-| created_at | timestamp | Waktu dibuat |
+| Field      | Type                    | Description                           |
+| ---------- | ----------------------- | ------------------------------------- |
+| id         | uuid / bigint           | Primary key                           |
+| user_id    | uuid / varchar nullable | User pelaku                           |
+| family_id  | uuid / bigint nullable  | Family tree terkait                   |
+| action     | varchar                 | CREATE, UPDATE, DELETE, LOGIN, EXPORT |
+| table_name | varchar                 | Nama tabel                            |
+| record_id  | varchar                 | ID record                             |
+| old_value  | json nullable           | Data lama                             |
+| new_value  | json nullable           | Data baru                             |
+| ip_address | varchar nullable        | IP address                            |
+| user_agent | text nullable           | User agent                            |
+| created_at | timestamp               | Waktu dibuat                          |
 
 ---
 
@@ -349,13 +351,13 @@ Menyimpan riwayat perubahan data penting.
 
 Menyimpan data peran sistem (RBAC).
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid | Primary key |
-| name | varchar | Nama role (e.g. SUPER_ADMIN, ADMIN, USER) |
-| description | text nullable | Deskripsi role |
-| created_at | timestamp | Waktu dibuat |
-| updated_at | timestamp | Waktu diperbarui |
+| Field       | Type          | Description                               |
+| ----------- | ------------- | ----------------------------------------- |
+| id          | uuid          | Primary key                               |
+| name        | varchar       | Nama role (e.g. SUPER_ADMIN, ADMIN, USER) |
+| description | text nullable | Deskripsi role                            |
+| created_at  | timestamp     | Waktu dibuat                              |
+| updated_at  | timestamp     | Waktu diperbarui                          |
 
 ---
 
@@ -363,13 +365,13 @@ Menyimpan data peran sistem (RBAC).
 
 Menyimpan data izin akses (RBAC).
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid | Primary key |
-| name | varchar | Nama permission (e.g. create:family, delete:family) |
-| description | text nullable | Deskripsi permission |
-| created_at | timestamp | Waktu dibuat |
-| updated_at | timestamp | Waktu diperbarui |
+| Field       | Type          | Description                                         |
+| ----------- | ------------- | --------------------------------------------------- |
+| id          | uuid          | Primary key                                         |
+| name        | varchar       | Nama permission (e.g. create:family, delete:family) |
+| description | text nullable | Deskripsi permission                                |
+| created_at  | timestamp     | Waktu dibuat                                        |
+| updated_at  | timestamp     | Waktu diperbarui                                    |
 
 ---
 
@@ -377,12 +379,12 @@ Menyimpan data izin akses (RBAC).
 
 Menghubungkan user dengan role (model_has_roles / user_has_roles).
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid | Primary key |
-| user_id | varchar | ID user (relasi ke users.id) |
-| role_id | uuid | ID role (relasi ke roles.id) |
-| created_at | timestamp | Waktu dibuat |
+| Field      | Type      | Description                  |
+| ---------- | --------- | ---------------------------- |
+| id         | uuid      | Primary key                  |
+| user_id    | varchar   | ID user (relasi ke users.id) |
+| role_id    | uuid      | ID role (relasi ke roles.id) |
+| created_at | timestamp | Waktu dibuat                 |
 
 ---
 
@@ -390,15 +392,14 @@ Menghubungkan user dengan role (model_has_roles / user_has_roles).
 
 Menghubungkan role dengan permission.
 
-| Field | Type | Description |
-|---|---|---|
-| id | uuid | Primary key |
-| role_id | uuid | ID role (relasi ke roles.id) |
-| permission_id | uuid | ID permission (relasi ke permissions.id) |
-| created_at | timestamp | Waktu dibuat |
+| Field         | Type      | Description                              |
+| ------------- | --------- | ---------------------------------------- |
+| id            | uuid      | Primary key                              |
+| role_id       | uuid      | ID role (relasi ke roles.id)             |
+| permission_id | uuid      | ID permission (relasi ke permissions.id) |
+| created_at    | timestamp | Waktu dibuat                             |
 
 ---
-
 
 # 4. Drizzle ORM Example
 
@@ -416,123 +417,189 @@ import {
   pgEnum,
   uniqueIndex,
   index,
+  integer,
   decimal,
   jsonb,
-} from 'drizzle-orm/pg-core'
+} from "drizzle-orm/pg-core";
 
-export const genderEnum = pgEnum('gender', ['MALE', 'FEMALE', 'UNKNOWN'])
-export const visibilityEnum = pgEnum('visibility', ['PRIVATE', 'INVITE_ONLY', 'PUBLIC'])
-export const familyRoleEnum = pgEnum('family_role', ['OWNER', 'ADMIN', 'EDITOR', 'VIEWER'])
-export const memberRelationEnum = pgEnum('member_relation', ['BIOLOGICAL', 'ADOPTED', 'STEP', 'FOSTER', 'UNKNOWN'])
-export const parentRoleEnum = pgEnum('parent_role', ['FATHER', 'MOTHER', 'PARENT', 'GUARDIAN'])
-export const marriageStatusEnum = pgEnum('marriage_status', ['MARRIED', 'DIVORCED', 'WIDOWED', 'SEPARATED', 'UNKNOWN'])
-export const donationStatusEnum = pgEnum('donation_status', ['PENDING', 'PAID', 'FAILED', 'REFUNDED'])
+export const genderEnum = pgEnum("gender", ["MALE", "FEMALE", "UNKNOWN"]);
+export const visibilityEnum = pgEnum("visibility", [
+  "PRIVATE",
+  "INVITE_ONLY",
+  "PUBLIC",
+]);
+export const familyRoleEnum = pgEnum("family_role", [
+  "OWNER",
+  "ADMIN",
+  "EDITOR",
+  "VIEWER",
+]);
+export const memberRelationEnum = pgEnum("member_relation", [
+  "BIOLOGICAL",
+  "ADOPTED",
+  "STEP",
+  "FOSTER",
+  "UNKNOWN",
+]);
+export const parentRoleEnum = pgEnum("parent_role", [
+  "FATHER",
+  "MOTHER",
+  "PARENT",
+  "GUARDIAN",
+]);
+export const marriageStatusEnum = pgEnum("marriage_status", [
+  "MARRIED",
+  "DIVORCED",
+  "WIDOWED",
+  "SEPARATED",
+  "UNKNOWN",
+]);
+export const donationStatusEnum = pgEnum("donation_status", [
+  "PENDING",
+  "PAID",
+  "FAILED",
+  "REFUNDED",
+]);
 
-export const families = pgTable('families', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  ownerUserId: varchar('owner_user_id', { length: 255 }).notNull(),
-  name: varchar('name', { length: 150 }).notNull(),
-  slug: varchar('slug', { length: 180 }).notNull(),
-  description: text('description'),
-  visibility: visibilityEnum('visibility').default('PRIVATE').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  deletedAt: timestamp('deleted_at'),
-}, (table) => ({
-  slugIdx: uniqueIndex('families_slug_idx').on(table.slug),
-  ownerIdx: index('families_owner_idx').on(table.ownerUserId),
-}))
+export const families = pgTable(
+  "families",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerUserId: varchar("owner_user_id", { length: 255 }).notNull(),
+    name: varchar("name", { length: 150 }).notNull(),
+    slug: varchar("slug", { length: 180 }).notNull(),
+    description: text("description"),
+    visibility: visibilityEnum("visibility").default("PRIVATE").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (table) => ({
+    slugIdx: uniqueIndex("families_slug_idx").on(table.slug),
+    ownerIdx: index("families_owner_idx").on(table.ownerUserId),
+  }),
+);
 
-export const familyMembers = pgTable('family_members', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  familyId: uuid('family_id').references(() => families.id).notNull(),
-  fullName: varchar('full_name', { length: 150 }).notNull(),
-  nickname: varchar('nickname', { length: 100 }),
-  gender: genderEnum('gender').default('UNKNOWN').notNull(),
-  birthPlace: varchar('birth_place', { length: 100 }),
-  birthDate: date('birth_date'),
-  isAlive: boolean('is_alive').default(true).notNull(),
-  deathDate: date('death_date'),
-  deathPlace: varchar('death_place', { length: 100 }),
-  occupation: varchar('occupation', { length: 100 }),
-  education: varchar('education', { length: 100 }),
-  religion: varchar('religion', { length: 50 }),
-  phone: varchar('phone', { length: 30 }),
-  email: varchar('email', { length: 150 }),
-  address: text('address'),
-  bio: text('bio'),
-  notesPrivate: text('notes_private'),
-  photoUrl: text('photo_url'),
-  createdBy: varchar('created_by', { length: 255 }),
-  updatedBy: varchar('updated_by', { length: 255 }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  deletedAt: timestamp('deleted_at'),
-}, (table) => ({
-  familyIdx: index('family_members_family_idx').on(table.familyId),
-  nameIdx: index('family_members_name_idx').on(table.fullName),
-}))
+export const familyMembers = pgTable(
+  "family_members",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    familyId: uuid("family_id")
+      .references(() => families.id)
+      .notNull(),
+    fullName: varchar("full_name", { length: 150 }).notNull(),
+    nickname: varchar("nickname", { length: 100 }),
+    gender: genderEnum("gender").default("UNKNOWN").notNull(),
+    birthPlace: varchar("birth_place", { length: 100 }),
+    birthDate: date("birth_date"),
+    isAlive: boolean("is_alive").default(true).notNull(),
+    deathDate: date("death_date"),
+    deathPlace: varchar("death_place", { length: 100 }),
+    occupation: varchar("occupation", { length: 100 }),
+    education: varchar("education", { length: 100 }),
+    religion: varchar("religion", { length: 50 }),
+    phone: varchar("phone", { length: 30 }),
+    email: varchar("email", { length: 150 }),
+    address: text("address"),
+    bio: text("bio"),
+    notesPrivate: text("notes_private"),
+    photoUrl: text("photo_url"),
+    positionX: integer("position_x"),
+    positionY: integer("position_y"),
+    createdBy: varchar("created_by", { length: 255 }),
+    updatedBy: varchar("updated_by", { length: 255 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
+  },
+  (table) => ({
+    familyIdx: index("family_members_family_idx").on(table.familyId),
+    nameIdx: index("family_members_name_idx").on(table.fullName),
+  }),
+);
 
-export const parentChildRelations = pgTable('parent_child_relations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  familyId: uuid('family_id').references(() => families.id).notNull(),
-  parentId: uuid('parent_id').references(() => familyMembers.id).notNull(),
-  childId: uuid('child_id').references(() => familyMembers.id).notNull(),
-  relationType: memberRelationEnum('relation_type').default('BIOLOGICAL').notNull(),
-  parentRole: parentRoleEnum('parent_role').default('PARENT').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => ({
-  familyIdx: index('parent_child_family_idx').on(table.familyId),
-  parentIdx: index('parent_child_parent_idx').on(table.parentId),
-  childIdx: index('parent_child_child_idx').on(table.childId),
-}))
+export const parentChildRelations = pgTable(
+  "parent_child_relations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    familyId: uuid("family_id")
+      .references(() => families.id)
+      .notNull(),
+    parentId: uuid("parent_id")
+      .references(() => familyMembers.id)
+      .notNull(),
+    childId: uuid("child_id")
+      .references(() => familyMembers.id)
+      .notNull(),
+    relationType: memberRelationEnum("relation_type")
+      .default("BIOLOGICAL")
+      .notNull(),
+    parentRole: parentRoleEnum("parent_role").default("PARENT").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    familyIdx: index("parent_child_family_idx").on(table.familyId),
+    parentIdx: index("parent_child_parent_idx").on(table.parentId),
+    childIdx: index("parent_child_child_idx").on(table.childId),
+  }),
+);
 
-export const marriages = pgTable('marriages', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  familyId: uuid('family_id').references(() => families.id).notNull(),
-  partner1Id: uuid('partner_1_id').references(() => familyMembers.id).notNull(),
-  partner2Id: uuid('partner_2_id').references(() => familyMembers.id).notNull(),
-  marriageDate: date('marriage_date'),
-  marriagePlace: varchar('marriage_place', { length: 100 }),
-  status: marriageStatusEnum('status').default('UNKNOWN').notNull(),
-  endedAt: date('ended_at'),
-  notes: text('notes'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => ({
-  familyIdx: index('marriages_family_idx').on(table.familyId),
-  partner1Idx: index('marriages_partner_1_idx').on(table.partner1Id),
-  partner2Idx: index('marriages_partner_2_idx').on(table.partner2Id),
-}))
+export const marriages = pgTable(
+  "marriages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    familyId: uuid("family_id")
+      .references(() => families.id)
+      .notNull(),
+    partner1Id: uuid("partner_1_id")
+      .references(() => familyMembers.id)
+      .notNull(),
+    partner2Id: uuid("partner_2_id")
+      .references(() => familyMembers.id)
+      .notNull(),
+    marriageDate: date("marriage_date"),
+    marriagePlace: varchar("marriage_place", { length: 100 }),
+    status: marriageStatusEnum("status").default("UNKNOWN").notNull(),
+    endedAt: date("ended_at"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    familyIdx: index("marriages_family_idx").on(table.familyId),
+    partner1Idx: index("marriages_partner_1_idx").on(table.partner1Id),
+    partner2Idx: index("marriages_partner_2_idx").on(table.partner2Id),
+  }),
+);
 
-export const donations = pgTable('donations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: varchar('user_id', { length: 255 }),
-  familyId: uuid('family_id').references(() => families.id),
-  donorName: varchar('donor_name', { length: 150 }),
-  donorEmail: varchar('donor_email', { length: 150 }),
-  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
-  currency: varchar('currency', { length: 10 }).default('IDR').notNull(),
-  paymentProvider: varchar('payment_provider', { length: 50 }),
-  paymentReference: varchar('payment_reference', { length: 150 }),
-  status: donationStatusEnum('status').default('PENDING').notNull(),
-  paidAt: timestamp('paid_at'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+export const donations = pgTable("donations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id", { length: 255 }),
+  familyId: uuid("family_id").references(() => families.id),
+  donorName: varchar("donor_name", { length: 150 }),
+  donorEmail: varchar("donor_email", { length: 150 }),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 10 }).default("IDR").notNull(),
+  paymentProvider: varchar("payment_provider", { length: 50 }),
+  paymentReference: varchar("payment_reference", { length: 150 }),
+  status: donationStatusEnum("status").default("PENDING").notNull(),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
-export const auditLogs = pgTable('audit_logs', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: varchar('user_id', { length: 255 }),
-  familyId: uuid('family_id').references(() => families.id),
-  action: varchar('action', { length: 100 }).notNull(),
-  tableName: varchar('table_name', { length: 100 }).notNull(),
-  recordId: varchar('record_id', { length: 255 }),
-  oldValue: jsonb('old_value'),
-  newValue: jsonb('new_value'),
-  ipAddress: varchar('ip_address', { length: 50 }),
-  userAgent: text('user_agent'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+export const auditLogs = pgTable("audit_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id", { length: 255 }),
+  familyId: uuid("family_id").references(() => families.id),
+  action: varchar("action", { length: 100 }).notNull(),
+  tableName: varchar("table_name", { length: 100 }).notNull(),
+  recordId: varchar("record_id", { length: 255 }),
+  oldValue: jsonb("old_value"),
+  newValue: jsonb("new_value"),
+  ipAddress: varchar("ip_address", { length: 50 }),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 ```
 
 ---
@@ -540,20 +607,24 @@ export const auditLogs = pgTable('audit_logs', {
 # 5. Zod Validation Example
 
 ```ts
-import { z } from 'zod'
+import { z } from "zod";
 
 export const createFamilySchema = z.object({
   name: z.string().min(2).max(150),
-  slug: z.string().min(3).max(180).regex(/^[a-z0-9-]+$/),
+  slug: z
+    .string()
+    .min(3)
+    .max(180)
+    .regex(/^[a-z0-9-]+$/),
   description: z.string().max(2000).optional(),
-  visibility: z.enum(['PRIVATE', 'INVITE_ONLY', 'PUBLIC']).default('PRIVATE'),
-})
+  visibility: z.enum(["PRIVATE", "INVITE_ONLY", "PUBLIC"]).default("PRIVATE"),
+});
 
 export const createFamilyMemberSchema = z.object({
   familyId: z.string().uuid(),
   fullName: z.string().min(1).max(150),
   nickname: z.string().max(100).optional(),
-  gender: z.enum(['MALE', 'FEMALE', 'UNKNOWN']).default('UNKNOWN'),
+  gender: z.enum(["MALE", "FEMALE", "UNKNOWN"]).default("UNKNOWN"),
   birthPlace: z.string().max(100).optional(),
   birthDate: z.coerce.date().optional(),
   isAlive: z.boolean().default(true),
@@ -566,32 +637,42 @@ export const createFamilyMemberSchema = z.object({
   email: z.string().email().optional(),
   address: z.string().max(2000).optional(),
   bio: z.string().max(5000).optional(),
-})
+});
 
-export const createParentChildRelationSchema = z.object({
-  familyId: z.string().uuid(),
-  parentId: z.string().uuid(),
-  childId: z.string().uuid(),
-  relationType: z.enum(['BIOLOGICAL', 'ADOPTED', 'STEP', 'FOSTER', 'UNKNOWN']).default('BIOLOGICAL'),
-  parentRole: z.enum(['FATHER', 'MOTHER', 'PARENT', 'GUARDIAN']).default('PARENT'),
-}).refine((data) => data.parentId !== data.childId, {
-  message: 'Parent and child cannot be the same person',
-  path: ['childId'],
-})
+export const createParentChildRelationSchema = z
+  .object({
+    familyId: z.string().uuid(),
+    parentId: z.string().uuid(),
+    childId: z.string().uuid(),
+    relationType: z
+      .enum(["BIOLOGICAL", "ADOPTED", "STEP", "FOSTER", "UNKNOWN"])
+      .default("BIOLOGICAL"),
+    parentRole: z
+      .enum(["FATHER", "MOTHER", "PARENT", "GUARDIAN"])
+      .default("PARENT"),
+  })
+  .refine((data) => data.parentId !== data.childId, {
+    message: "Parent and child cannot be the same person",
+    path: ["childId"],
+  });
 
-export const createMarriageSchema = z.object({
-  familyId: z.string().uuid(),
-  partner1Id: z.string().uuid(),
-  partner2Id: z.string().uuid(),
-  marriageDate: z.coerce.date().optional(),
-  marriagePlace: z.string().max(100).optional(),
-  status: z.enum(['MARRIED', 'DIVORCED', 'WIDOWED', 'SEPARATED', 'UNKNOWN']).default('UNKNOWN'),
-  endedAt: z.coerce.date().optional(),
-  notes: z.string().max(2000).optional(),
-}).refine((data) => data.partner1Id !== data.partner2Id, {
-  message: 'Partners cannot be the same person',
-  path: ['partner2Id'],
-})
+export const createMarriageSchema = z
+  .object({
+    familyId: z.string().uuid(),
+    partner1Id: z.string().uuid(),
+    partner2Id: z.string().uuid(),
+    marriageDate: z.coerce.date().optional(),
+    marriagePlace: z.string().max(100).optional(),
+    status: z
+      .enum(["MARRIED", "DIVORCED", "WIDOWED", "SEPARATED", "UNKNOWN"])
+      .default("UNKNOWN"),
+    endedAt: z.coerce.date().optional(),
+    notes: z.string().max(2000).optional(),
+  })
+  .refine((data) => data.partner1Id !== data.partner2Id, {
+    message: "Partners cannot be the same person",
+    path: ["partner2Id"],
+  });
 ```
 
 ---
@@ -605,18 +686,18 @@ Database tidak langsung disimpan sebagai posisi diagram. Data perlu diubah menja
 ```ts
 const nodes = [
   {
-    id: 'member-1',
-    type: 'personCard',
+    id: "member-1",
+    type: "personCard",
     position: { x: 100, y: 100 },
     data: {
-      memberId: '1',
-      fullName: 'Budi Santoso',
-      gender: 'MALE',
+      memberId: "1",
+      fullName: "Budi Santoso",
+      gender: "MALE",
       isAlive: true,
-      photoUrl: '/uploads/budi.jpg',
+      photoUrl: "/uploads/budi.jpg",
     },
   },
-]
+];
 ```
 
 ## Edge Example
@@ -624,12 +705,12 @@ const nodes = [
 ```ts
 const edges = [
   {
-    id: 'parent-1-child-3',
-    source: 'member-1',
-    target: 'member-3',
-    type: 'smoothstep',
+    id: "parent-1-child-3",
+    source: "member-1",
+    target: "member-3",
+    type: "smoothstep",
   },
-]
+];
 ```
 
 ## Recommended Frontend Packages
@@ -719,12 +800,12 @@ VIEWER
 
 Akses ideal:
 
-| Role | View | Add | Edit | Delete | Invite | Export |
-|---|---|---|---|---|---|---|
-| OWNER | Yes | Yes | Yes | Yes | Yes | Yes |
-| ADMIN | Yes | Yes | Yes | Yes | Yes | Optional |
-| EDITOR | Yes | Yes | Yes | No | No | No |
-| VIEWER | Yes | No | No | No | No | No |
+| Role   | View | Add | Edit | Delete | Invite | Export   |
+| ------ | ---- | --- | ---- | ------ | ------ | -------- |
+| OWNER  | Yes  | Yes | Yes  | Yes    | Yes    | Yes      |
+| ADMIN  | Yes  | Yes | Yes  | Yes    | Yes    | Optional |
+| EDITOR | Yes  | Yes | Yes  | No     | No     | No       |
+| VIEWER | Yes  | No  | No   | No     | No     | No       |
 
 ---
 
