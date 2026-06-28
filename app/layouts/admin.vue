@@ -15,6 +15,16 @@ const links = computed<NavigationMenuItem[][]>(() => [
   ],
   [
     {
+      label: 'Dashboard Overview',
+      icon: 'i-lucide-layout-dashboard',
+      to: '/admin'
+    },
+    {
+      label: 'Kelola Users',
+      icon: 'i-lucide-users',
+      to: '/admin/users'
+    },
+    {
       label: 'Kelola Roles',
       icon: 'i-lucide-shield',
       to: '/admin/roles'
@@ -38,6 +48,8 @@ const links = computed<NavigationMenuItem[][]>(() => [
 ])
 
 const pageTitle = computed(() => {
+  if (route.path === '/admin') return 'Dashboard Overview'
+  if (route.path.startsWith('/admin/users')) return 'Kelola Users'
   if (route.path.startsWith('/admin/roles')) return 'Kelola Roles'
   if (route.path.startsWith('/admin/permissions')) return 'Kelola Permissions'
   if (route.path.startsWith('/admin/user-roles')) return 'Kelola User Roles'
