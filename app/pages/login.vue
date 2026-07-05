@@ -15,20 +15,28 @@ const form = reactive({
 const login = async () => {
   loading.value = true
 
-  const { error } = await authClient.signIn.email({
-    email: form.email,
-    password: form.password,
-    callbackURL: '/dashboard'
-  })
+  try {
+    const { error } = await authClient.signIn.email({
+      email: form.email,
+      password: form.password,
+      callbackURL: '/dashboard'
+    })
 
-  loading.value = false
+    if (error) {
+      toast.add({ title: 'Login gagal', description: error.message, color: 'error' })
+      return
+    }
 
-  if (error) {
-    toast.add({ title: 'Login gagal', description: error.message, color: 'error' })
-    return
+    await navigateTo('/dashboard')
+  } catch (error: any) {
+    toast.add({
+      title: 'Login gagal',
+      description: error?.message || 'Server auth tidak merespons.',
+      color: 'error'
+    })
+  } finally {
+    loading.value = false
   }
-
-  await navigateTo('/dashboard')
 }
 
 const loginWithGoogle = async () => {

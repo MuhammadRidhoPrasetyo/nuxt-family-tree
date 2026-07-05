@@ -3,6 +3,7 @@ import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { MiniMap } from '@vue-flow/minimap'
 import { VueFlow, Handle, Position } from '@vue-flow/core'
+import FamilyTreeNode from '~/components/family-tree/FamilyTreeNode.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -21,6 +22,29 @@ type Family = {
   ownerUserId: string
 }
 
+type NodeViewMode = 'CLASSIC_CARD' | 'COMPACT_MINIMAL' | 'DETAILED_PROFILE' | 'MEMORIAL_STYLE'
+type TreeNodeSettings = {
+  showPhotos: boolean
+  showBirthDates: boolean
+  showNicknames: boolean
+  colorByGender: boolean
+}
+type TreePreferences = TreeNodeSettings & {
+  nodeViewMode: NodeViewMode
+}
+type NodePreference = Partial<TreeNodeSettings> & {
+  memberId: string
+  nodeViewMode?: NodeViewMode | null
+}
+
+const defaultTreePreferences: TreePreferences = {
+  nodeViewMode: 'CLASSIC_CARD',
+  showPhotos: true,
+  showBirthDates: true,
+  showNicknames: true,
+  colorByGender: true
+}
+
 const { data, error } = await useFetch<{ family: Family }>(`/api/families/${route.params.id}`, {
   credentials: 'include'
 })
@@ -35,12 +59,64 @@ if (error.value) {
 // Fetch family members & relations
 const { data: treeData, refresh: refreshTree } = await useFetch<any>(`/api/families/${route.params.id}/members`, {
   credentials: 'include',
-  default: () => ({ members: [], relations: [], marriages: [] })
+  default: () => ({ members: [], relations: [], marriages: [], preferences: defaultTreePreferences, nodePreferences: [] })
 })
 
 // Visual nodes & edges
 const nodes = ref<any[]>([])
 const edges = ref<any[]>([])
+const selectedNodePreferenceMode = ref<NodeViewMode | 'INHERIT'>('INHERIT')
+const savingNodePreference = ref(false)
+const nodePreferences = ref<NodePreference[]>([])
+
+const treePreferences = reactive<TreePreferences>({ ...defaultTreePreferences })
+
+const nodePreferenceModeItems = [
+  { label: 'Ikuti default tree', value: 'INHERIT' },
+  { label: 'Classic Card', value: 'CLASSIC_CARD' },
+  { label: 'Compact / Minimal', value: 'COMPACT_MINIMAL' },
+  { label: 'Detailed Profile', value: 'DETAILED_PROFILE' },
+  { label: 'Memorial Style', value: 'MEMORIAL_STYLE' }
+]
+
+const nodePreferenceMap = computed(() => {
+  const map = new Map<string, NodePreference>()
+  nodePreferences.value.forEach((preference: NodePreference) => {
+    map.set(preference.memberId, preference)
+  })
+  return map
+})
+
+const applyTreePreferencesFromResponse = () => {
+  const preferences = treeData.value?.preferences || defaultTreePreferences
+  treePreferences.nodeViewMode = preferences.nodeViewMode || defaultTreePreferences.nodeViewMode
+  treePreferences.showPhotos = preferences.showPhotos ?? defaultTreePreferences.showPhotos
+  treePreferences.showBirthDates = preferences.showBirthDates ?? defaultTreePreferences.showBirthDates
+  treePreferences.showNicknames = preferences.showNicknames ?? defaultTreePreferences.showNicknames
+  treePreferences.colorByGender = preferences.colorByGender ?? defaultTreePreferences.colorByGender
+}
+
+const getEffectiveNodeConfig = (memberId: string) => {
+  const nodePreference = nodePreferenceMap.value.get(memberId)
+  return {
+    nodeViewMode: nodePreference?.nodeViewMode || treePreferences.nodeViewMode,
+    settings: {
+      showPhotos: nodePreference?.showPhotos ?? treePreferences.showPhotos,
+      showBirthDates: nodePreference?.showBirthDates ?? treePreferences.showBirthDates,
+      showNicknames: nodePreference?.showNicknames ?? treePreferences.showNicknames,
+      colorByGender: nodePreference?.colorByGender ?? treePreferences.colorByGender
+    }
+  }
+}
+
+const getRelationLabel = (memberId: string, relations: any[]) => {
+  const relation = relations.find((item: any) => item.childId === memberId)
+  if (!relation) return 'Anggota Keluarga'
+  if (relation.parentRole === 'FATHER') return 'Ayah'
+  if (relation.parentRole === 'MOTHER') return 'Ibu'
+  if (relation.parentRole === 'GUARDIAN') return 'Wali'
+  return 'Orang Tua'
+}
 
 const generateTreeLayout = () => {
   if (!treeData.value) return
@@ -144,11 +220,17 @@ const generateTreeLayout = () => {
 
   const mappedNodes = members.map((m: any) => {
     const pos = positions[m.id] || { x: 250, y: 150 }
+    const nodeConfig = getEffectiveNodeConfig(m.id)
 
     return {
       id: m.id,
       type: 'custom',
-      data: m,
+      data: {
+        ...m,
+        nodeViewMode: nodeConfig.nodeViewMode,
+        nodeSettings: nodeConfig.settings,
+        relationLabel: getRelationLabel(m.id, relations)
+      },
       label: m.fullName,
       position: pos
     }
@@ -202,8 +284,14 @@ const generateTreeLayout = () => {
 }
 
 watch(treeData, () => {
+  applyTreePreferencesFromResponse()
+  nodePreferences.value = [...(treeData.value?.nodePreferences || [])]
   generateTreeLayout()
 }, { immediate: true })
+
+watch(treePreferences, () => {
+  generateTreeLayout()
+})
 
 // Slideover state & form
 const isSlideoverOpen = ref(false)
@@ -272,6 +360,7 @@ const openCreateMode = () => {
 const onNodeClick = ({ node }: any) => {
   selectedNodeId.value = node.id
   const member = node.data
+  selectedNodePreferenceMode.value = nodePreferenceMap.value.get(node.id)?.nodeViewMode || 'INHERIT'
   memberForm.fullName = member.fullName || ''
   memberForm.nickname = member.nickname || ''
   memberForm.gender = member.gender || 'UNKNOWN'
@@ -291,6 +380,56 @@ const onNodeClick = ({ node }: any) => {
   memberForm.photoUrl = member.photoUrl || ''
   
   isSlideoverOpen.value = true
+}
+
+const saveSelectedNodePreference = async () => {
+  if (!selectedNodeId.value) return
+  savingNodePreference.value = true
+  try {
+    const res = await $fetch<{ preference: NodePreference }>(`/api/families/${route.params.id}/members/${selectedNodeId.value}/tree-preference`, {
+      method: 'PATCH',
+      body: {
+        nodeViewMode: selectedNodePreferenceMode.value === 'INHERIT' ? null : selectedNodePreferenceMode.value
+      },
+      credentials: 'include'
+    })
+    if (treeData.value) {
+      nodePreferences.value = [
+        ...nodePreferences.value.filter((preference: NodePreference) => preference.memberId !== selectedNodeId.value),
+        res.preference
+      ]
+      treeData.value.nodePreferences = nodePreferences.value
+    }
+    generateTreeLayout()
+    toast.add({ title: 'Style node berhasil disimpan', color: 'success' })
+  } catch (err: any) {
+    toast.add({ title: 'Gagal menyimpan style node', description: err.data?.message || err.message, color: 'error' })
+  } finally {
+    savingNodePreference.value = false
+  }
+}
+
+const clearSelectedNodePreference = async () => {
+  if (!selectedNodeId.value) return
+  savingNodePreference.value = true
+  try {
+    await $fetch(`/api/families/${route.params.id}/members/${selectedNodeId.value}/tree-preference`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+    if (treeData.value) {
+      nodePreferences.value = nodePreferences.value
+        .filter((preference: NodePreference) => preference.memberId !== selectedNodeId.value)
+      treeData.value.nodePreferences = nodePreferences.value
+    }
+    selectedNodePreferenceMode.value = 'INHERIT'
+    generateTreeLayout()
+    toast.add({ title: 'Override style node dihapus', color: 'success' })
+  } catch (err: any) {
+    toast.add({ title: 'Gagal menghapus override style', description: err.data?.message || err.message, color: 'error' })
+  } finally {
+    savingNodePreference.value = false
+  }
 }
 
 const onNodeDragStop = async ({ node }: any) => {
@@ -364,17 +503,6 @@ const handleFileUpload = async (event: Event) => {
     })
   } finally {
     uploadingPhoto.value = false
-  }
-}
-
-const formatMemberDate = (dateStr: string | null) => {
-  if (!dateStr) return ''
-  try {
-    const d = new Date(dateStr)
-    if (isNaN(d.getTime())) return ''
-    return d.toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })
-  } catch {
-    return ''
   }
 }
 
@@ -885,33 +1013,13 @@ const submitRelation = async () => {
           @node-drag-stop="onNodeDragStop"
         >
           <template #node-custom="{ data }">
-            <div 
-              class="flex items-center gap-3 p-3 rounded-xl border shadow-md min-w-[240px] max-w-[280px] relative transition-all duration-200"
-              :style="{
-                borderColor: data.gender === 'MALE' ? '#3b82f6' : data.gender === 'FEMALE' ? '#ec4899' : '#94a3b8',
-                backgroundColor: 'var(--ui-bg-elevated)',
-                color: 'var(--ui-text-highlighted)'
-              }"
-            >
-              <!-- Photo on Left -->
-              <div class="w-12 h-12 rounded-full overflow-hidden border border-default bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0">
-                <img v-if="data.photoUrl" :src="data.photoUrl" class="w-full h-full object-cover" />
-                <UIcon 
-                  v-else 
-                  :name="data.gender === 'MALE' ? 'i-lucide-user' : data.gender === 'FEMALE' ? 'i-lucide-user-2' : 'i-lucide-user-cog'" 
-                  class="size-6 text-muted-foreground" 
-                />
-              </div>
-
-              <!-- Info on Right -->
-              <div class="flex-1 min-w-0 text-left">
-                <div class="truncate font-bold text-sm leading-snug">{{ data.fullName }}</div>
-                <div v-if="data.nickname" class="text-[10px] text-muted truncate">({{ data.nickname }})</div>
-                <div class="text-[10px] text-muted-foreground truncate mt-0.5 flex items-center gap-1">
-                  <UIcon name="i-lucide-calendar" class="size-3" />
-                  <span>{{ formatMemberDate(data.birthDate) || 'Tgl Lahir -' }}</span>
-                </div>
-              </div>
+            <div class="relative transition-all duration-200">
+              <FamilyTreeNode
+                :member="data"
+                :variant="data.nodeViewMode"
+                :settings="data.nodeSettings"
+                :relation-label="data.relationLabel"
+              />
 
               <!-- Standard Top/Bottom handles for parent-child relations -->
               <Handle type="target" :position="Position.Top" id="top" style="background: #94a3b8;" />
@@ -944,6 +1052,33 @@ const submitRelation = async () => {
         <div class="space-y-4">
           <!-- Quick Generate Relations Buttons (Only in Edit/Selected Mode) -->
           <div v-if="selectedNodeId" class="space-y-3 pb-4 border-b border-default">
+            <div class="space-y-3">
+              <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tampilan Node</p>
+              <div class="grid gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+                <UFormField label="Variant">
+                  <USelect v-model="selectedNodePreferenceMode" :items="nodePreferenceModeItems" class="w-full" />
+                </UFormField>
+                <UButton
+                  icon="i-lucide-save"
+                  color="primary"
+                  variant="soft"
+                  :loading="savingNodePreference"
+                  @click="saveSelectedNodePreference"
+                >
+                  Simpan
+                </UButton>
+                <UButton
+                  icon="i-lucide-rotate-ccw"
+                  color="neutral"
+                  variant="outline"
+                  :loading="savingNodePreference"
+                  @click="clearSelectedNodePreference"
+                >
+                  Reset
+                </UButton>
+              </div>
+            </div>
+
             <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Hubungkan Relasi Baru</p>
             <div class="grid grid-cols-2 gap-3">
               <!-- Orang Tua -->
@@ -1403,4 +1538,3 @@ const submitRelation = async () => {
     </UModal>
   </div>
 </template>
-

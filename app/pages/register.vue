@@ -16,21 +16,29 @@ const form = reactive({
 const register = async () => {
   loading.value = true
 
-  const { error } = await authClient.signUp.email({
-    name: form.name,
-    email: form.email,
-    password: form.password,
-    callbackURL: '/dashboard'
-  })
+  try {
+    const { error } = await authClient.signUp.email({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      callbackURL: '/dashboard'
+    })
 
-  loading.value = false
+    if (error) {
+      toast.add({ title: 'Register gagal', description: error.message, color: 'error' })
+      return
+    }
 
-  if (error) {
-    toast.add({ title: 'Register gagal', description: error.message, color: 'error' })
-    return
+    await navigateTo('/dashboard')
+  } catch (error: any) {
+    toast.add({
+      title: 'Register gagal',
+      description: error?.message || 'Server auth tidak merespons.',
+      color: 'error'
+    })
+  } finally {
+    loading.value = false
   }
-
-  await navigateTo('/dashboard')
 }
 
 const registerWithGoogle = async () => {

@@ -5,10 +5,23 @@ import { roles, userRoles } from '../database/schema'
 import { eq } from 'drizzle-orm'
 
 const config = useRuntimeConfig()
+const configuredAuthOrigin = config.public.betterAuthUrl.replace(/\/$/, '')
+const envTrustedOrigins = process.env.BETTER_AUTH_TRUSTED_ORIGINS
+  ?.split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean) || []
 
 export const auth = betterAuth({
   secret: config.betterAuthSecret,
-  baseURL: config.public.betterAuthUrl,
+  baseURL: configuredAuthOrigin,
+  trustedOrigins: [
+    configuredAuthOrigin,
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
+    ...envTrustedOrigins
+  ],
   database: drizzleAdapter(db, {
     provider: 'pg'
   }),
@@ -57,4 +70,3 @@ export const auth = betterAuth({
     }
   }
 })
-

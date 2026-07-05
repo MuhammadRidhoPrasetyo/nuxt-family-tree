@@ -30,6 +30,12 @@ export const familyRoleEnum = pgEnum('family_role', ['OWNER', 'ADMIN', 'EDITOR',
 export const invitationRoleEnum = pgEnum('invitation_role', ['EDITOR', 'VIEWER'])
 export const mediaTypeEnum = pgEnum('media_type', ['PHOTO', 'DOCUMENT', 'VIDEO', 'OTHER'])
 export const donationStatusEnum = pgEnum('donation_status', ['PENDING', 'PAID', 'FAILED', 'REFUNDED'])
+export const nodeViewModeEnum = pgEnum('node_view_mode', [
+  'CLASSIC_CARD',
+  'COMPACT_MINIMAL',
+  'DETAILED_PROFILE',
+  'MEMORIAL_STYLE'
+])
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -237,6 +243,52 @@ export const privacySettings = pgTable('privacy_settings', {
   uniqueIndex('privacy_settings_family_id_idx').on(table.familyId)
 ])
 
+export const familyTreePreferences = pgTable('family_tree_preferences', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  familyId: uuid('family_id')
+    .notNull()
+    .references(() => families.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  nodeViewMode: nodeViewModeEnum('node_view_mode').notNull().default('CLASSIC_CARD'),
+  showPhotos: boolean('show_photos').notNull().default(true),
+  showBirthDates: boolean('show_birth_dates').notNull().default(true),
+  showNicknames: boolean('show_nicknames').notNull().default(true),
+  colorByGender: boolean('color_by_gender').notNull().default(true),
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow()
+}, (table) => [
+  unique('family_tree_preferences_family_user_unique').on(table.familyId, table.userId),
+  index('family_tree_preferences_family_id_idx').on(table.familyId),
+  index('family_tree_preferences_user_id_idx').on(table.userId)
+])
+
+export const familyTreeNodePreferences = pgTable('family_tree_node_preferences', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  familyId: uuid('family_id')
+    .notNull()
+    .references(() => families.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  memberId: uuid('member_id')
+    .notNull()
+    .references(() => familyMembers.id, { onDelete: 'cascade' }),
+  nodeViewMode: nodeViewModeEnum('node_view_mode'),
+  showPhotos: boolean('show_photos'),
+  showBirthDates: boolean('show_birth_dates'),
+  showNicknames: boolean('show_nicknames'),
+  colorByGender: boolean('color_by_gender'),
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow()
+}, (table) => [
+  unique('family_tree_node_preferences_family_user_member_unique').on(table.familyId, table.userId, table.memberId),
+  index('family_tree_node_preferences_family_id_idx').on(table.familyId),
+  index('family_tree_node_preferences_user_id_idx').on(table.userId),
+  index('family_tree_node_preferences_member_id_idx').on(table.memberId)
+])
+
 export const mediaFiles = pgTable('media_files', {
   id: uuid('id').primaryKey().defaultRandom(),
   familyId: uuid('family_id')
@@ -328,4 +380,3 @@ export const rolePermissions = pgTable('role_permissions', {
 }, (table) => [
   unique('role_permissions_role_permission_unique').on(table.roleId, table.permissionId)
 ])
-

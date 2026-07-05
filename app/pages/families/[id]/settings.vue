@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import NodeVariantPicker from '~/components/family-tree/NodeVariantPicker.vue'
+
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
@@ -12,10 +14,37 @@ type Family = {
   visibility: 'PRIVATE' | 'INVITE_ONLY' | 'PUBLIC'
 }
 
+type NodeViewMode = 'CLASSIC_CARD' | 'COMPACT_MINIMAL' | 'DETAILED_PROFILE' | 'MEMORIAL_STYLE'
+
+type TreeNodeSettings = {
+  showPhotos: boolean
+  showBirthDates: boolean
+  showNicknames: boolean
+  colorByGender: boolean
+}
+
+type TreePreferences = TreeNodeSettings & {
+  nodeViewMode: NodeViewMode
+}
+
+const defaultTreePreferences: TreePreferences = {
+  nodeViewMode: 'CLASSIC_CARD',
+  showPhotos: true,
+  showBirthDates: true,
+  showNicknames: true,
+  colorByGender: true
+}
+
 const route = useRoute()
 const toast = useToast()
 const loading = ref(false)
 const deleting = ref(false)
+const savingTreePreferences = ref(false)
+const isEditNameModalOpen = ref(false)
+const savingFamilyName = ref(false)
+const familyNameForm = reactive({
+  name: ''
+})
 
 const { data, error } = await useFetch<{ family: Family }>(`/api/families/${route.params.id}`, {
   credentials: 'include'
@@ -44,6 +73,25 @@ const { data: privacyData, refresh: refreshPrivacy } = await useFetch<{
 })
 
 const isOwner = computed(() => privacyData.value?.isOwner ?? false)
+
+const { data: treePreferenceData, refresh: refreshTreePreferences } = await useFetch<{ preferences: TreePreferences }>(`/api/families/${route.params.id}/tree-preferences`, {
+  credentials: 'include',
+  default: () => ({ preferences: defaultTreePreferences })
+})
+
+const treePreferences = reactive<TreePreferences>({ ...defaultTreePreferences })
+
+const applyTreePreferences = (preferences?: Partial<TreePreferences>) => {
+  treePreferences.nodeViewMode = preferences?.nodeViewMode || defaultTreePreferences.nodeViewMode
+  treePreferences.showPhotos = preferences?.showPhotos ?? defaultTreePreferences.showPhotos
+  treePreferences.showBirthDates = preferences?.showBirthDates ?? defaultTreePreferences.showBirthDates
+  treePreferences.showNicknames = preferences?.showNicknames ?? defaultTreePreferences.showNicknames
+  treePreferences.colorByGender = preferences?.colorByGender ?? defaultTreePreferences.colorByGender
+}
+
+watch(() => treePreferenceData.value?.preferences, (preferences) => {
+  applyTreePreferences(preferences)
+}, { immediate: true, deep: true })
 
 const privacyForm = reactive({
   showLivingPeople: privacyData.value?.privacySettings.showLivingPeople ?? false,
@@ -86,6 +134,72 @@ const updatePrivacySettings = async () => {
     toast.add({ title: 'Gagal memperbarui', description: message, color: 'error' })
   } finally {
     loading.value = false
+  }
+}
+
+const saveTreePreferences = async () => {
+  savingTreePreferences.value = true
+  try {
+    const res = await $fetch<{ preferences: TreePreferences }>(`/api/families/${route.params.id}/tree-preferences`, {
+      method: 'PATCH',
+      body: {
+        nodeViewMode: treePreferences.nodeViewMode,
+        showPhotos: treePreferences.showPhotos,
+        showBirthDates: treePreferences.showBirthDates,
+        showNicknames: treePreferences.showNicknames,
+        colorByGender: treePreferences.colorByGender
+      },
+      credentials: 'include'
+    })
+    treePreferenceData.value = { preferences: res.preferences }
+    toast.add({ title: 'Tampilan node default diperbarui', color: 'success' })
+    await refreshTreePreferences()
+  } catch (err: any) {
+    const message = err.data?.message || 'Gagal menyimpan tampilan node.'
+    toast.add({ title: 'Gagal menyimpan', description: message, color: 'error' })
+  } finally {
+    savingTreePreferences.value = false
+  }
+}
+
+const openEditNameModal = () => {
+  familyNameForm.name = data.value?.family.name || ''
+  isEditNameModalOpen.value = true
+}
+
+const updateFamilyName = async () => {
+  if (!isOwner.value || !data.value?.family) {
+    toast.add({ title: 'Akses Ditolak', description: 'Hanya pemilik (owner) yang dapat mengubah nama family tree.', color: 'error' })
+    return
+  }
+
+  const nextName = familyNameForm.name.trim()
+  if (nextName.length < 2) {
+    toast.add({ title: 'Nama terlalu pendek', description: 'Nama family tree minimal 2 karakter.', color: 'warning' })
+    return
+  }
+
+  savingFamilyName.value = true
+  try {
+    const res = await $fetch<{ family: Family }>(`/api/families/${route.params.id}`, {
+      method: 'PATCH',
+      body: {
+        name: nextName,
+        slug: data.value.family.slug,
+        description: data.value.family.description || '',
+        visibility: data.value.family.visibility
+      },
+      credentials: 'include'
+    })
+
+    data.value.family = res.family
+    isEditNameModalOpen.value = false
+    toast.add({ title: 'Nama family tree diperbarui', color: 'success' })
+  } catch (err: any) {
+    const message = err.data?.message || 'Gagal mengubah nama family tree.'
+    toast.add({ title: 'Gagal menyimpan', description: message, color: 'error' })
+  } finally {
+    savingFamilyName.value = false
   }
 }
 
@@ -213,20 +327,29 @@ const removeCollab = async (id: string, type: 'ACTIVE' | 'PENDING', label: strin
           Pengaturan Family Tree
         </h1>
         <p class="text-sm text-muted">
-          Kelola privasi data silsilah keluarga dan undang kolaborator baru.
+          {{ data?.family.name }} · Kelola privasi data silsilah keluarga dan undang kolaborator baru.
         </p>
       </div>
 
-      <UButton 
-        v-if="isOwner" 
-        color="error" 
-        variant="outline" 
-        icon="i-lucide-trash-2" 
-        :loading="deleting" 
-        @click="deleteFamily"
-      >
-        Hapus Family Tree
-      </UButton>
+      <div v-if="isOwner" class="flex flex-wrap items-center gap-2">
+        <UButton
+          color="neutral"
+          variant="outline"
+          icon="i-lucide-pencil"
+          @click="openEditNameModal"
+        >
+          Edit Nama
+        </UButton>
+        <UButton 
+          color="error" 
+          variant="outline" 
+          icon="i-lucide-trash-2" 
+          :loading="deleting" 
+          @click="deleteFamily"
+        >
+          Hapus Family Tree
+        </UButton>
+      </div>
     </div>
 
     <!-- Alert for Non-Owner -->
@@ -239,6 +362,14 @@ const removeCollab = async (id: string, type: 'ACTIVE' | 'PENDING', label: strin
         </p>
       </div>
     </div>
+
+    <NodeVariantPicker
+      v-model="treePreferences.nodeViewMode"
+      :settings="treePreferences"
+      :saving="savingTreePreferences"
+      @update:settings="Object.assign(treePreferences, $event)"
+      @save="saveTreePreferences"
+    />
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
       <!-- Privacy Settings Form -->
@@ -421,5 +552,43 @@ const removeCollab = async (id: string, type: 'ACTIVE' | 'PENDING', label: strin
         </UCard>
       </div>
     </div>
+
+    <UModal
+      v-model:open="isEditNameModalOpen"
+      title="Edit Nama Family Tree"
+      description="Ubah nama yang ditampilkan untuk family tree ini."
+    >
+      <template #body>
+        <form class="space-y-4" @submit.prevent="updateFamilyName">
+          <UFormField label="Nama Family Tree" name="name" required>
+            <UInput
+              v-model="familyNameForm.name"
+              icon="i-lucide-pencil"
+              placeholder="Nama family tree"
+              required
+              class="w-full"
+            />
+          </UFormField>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <UButton
+              type="button"
+              color="neutral"
+              variant="outline"
+              @click="isEditNameModalOpen = false"
+            >
+              Batal
+            </UButton>
+            <UButton
+              type="submit"
+              icon="i-lucide-save"
+              :loading="savingFamilyName"
+            >
+              Simpan Nama
+            </UButton>
+          </div>
+        </form>
+      </template>
+    </UModal>
   </div>
 </template>

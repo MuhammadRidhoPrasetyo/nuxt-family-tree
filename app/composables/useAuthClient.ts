@@ -6,10 +6,12 @@ let authClient: AuthClient | null = null
 
 export const useAuthClient = () => {
   const config = useRuntimeConfig()
-  const betterAuthUrl = config.public.betterAuthUrl.replace(/\/$/, '')
+  const origin = import.meta.client
+    ? window.location.origin
+    : config.public.betterAuthUrl.replace(/\/$/, '')
 
   authClient ??= createAuthClient({
-    baseURL: `${betterAuthUrl}/api/auth`
+    baseURL: `${origin}/api/auth`
   })
 
   return authClient

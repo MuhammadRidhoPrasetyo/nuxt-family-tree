@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads')
+  const uploadDir = path.join(process.cwd(), 'app', 'public', 'uploads')
   await fs.mkdir(uploadDir, { recursive: true })
 
   const fileExt = path.extname(file.filename) || '.jpg'

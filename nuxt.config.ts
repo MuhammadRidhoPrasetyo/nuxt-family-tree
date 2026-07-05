@@ -1,11 +1,20 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-06-27',
-  devtools: { enabled: true },
+  devtools: {
+    enabled: process.env.NODE_ENV !== 'production' && process.env.NUXT_DEVTOOLS !== 'false'
+  },
   future: {
     compatibilityVersion: 4
   },
   modules: ['@nuxt/ui'],
   css: ['~/assets/css/main.css'],
+  nitro: {
+    rollupConfig: {
+      watch: {
+        exclude: ['node_modules/**']
+      }
+    }
+  },
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL,
     betterAuthSecret: process.env.BETTER_AUTH_SECRET,
@@ -16,6 +25,6 @@ export default defineNuxtConfig({
     }
   },
   typescript: {
-    typeCheck: true
+    typeCheck: process.env.NODE_ENV === 'production'
   }
 })

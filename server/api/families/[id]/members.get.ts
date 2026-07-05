@@ -1,5 +1,13 @@
 import { eq, and, isNull } from 'drizzle-orm'
-import { familyMembers, familyUserRoles, parentChildRelations, marriages, privacySettings } from '../../../database/schema'
+import {
+  familyMembers,
+  familyTreeNodePreferences,
+  familyTreePreferences,
+  familyUserRoles,
+  marriages,
+  parentChildRelations,
+  privacySettings
+} from '../../../database/schema'
 import { db } from '../../../utils/db'
 import { requireCurrentUser } from '../../../utils/session'
 
@@ -61,6 +69,24 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  let [preferences] = await db
+    .select()
+    .from(familyTreePreferences)
+    .where(
+      and(
+        eq(familyTreePreferences.familyId, familyId),
+        eq(familyTreePreferences.userId, user.id)
+      )
+    )
+    .limit(1)
+
+  if (!preferences) {
+    [preferences] = await db
+      .insert(familyTreePreferences)
+      .values({ familyId, userId: user.id })
+      .returning()
+  }
+
   let members = await db
     .select()
     .from(familyMembers)
@@ -111,9 +137,22 @@ export default defineEventHandler(async (event) => {
     .where(eq(marriages.familyId, familyId)))
     .filter(m => visibleMemberIds.has(m.partner1Id) && visibleMemberIds.has(m.partner2Id))
 
+  const nodePreferences = (await db
+    .select()
+    .from(familyTreeNodePreferences)
+    .where(
+      and(
+        eq(familyTreeNodePreferences.familyId, familyId),
+        eq(familyTreeNodePreferences.userId, user.id)
+      )
+    ))
+    .filter(preference => visibleMemberIds.has(preference.memberId))
+
   return {
     members,
     relations,
-    marriages: marriageList
+    marriages: marriageList,
+    preferences,
+    nodePreferences
   }
 })
