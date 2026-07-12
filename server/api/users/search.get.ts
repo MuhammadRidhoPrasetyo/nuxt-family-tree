@@ -1,20 +1,17 @@
 import { eq } from 'drizzle-orm'
+import { z } from 'zod'
 import { user } from '../../database/schema'
 import { db } from '../../utils/db'
 import { requireCurrentUser } from '../../utils/session'
+import { ok, parseWithZod } from '../../utils/api'
+
+const searchUserQuerySchema = z.object({
+  email: z.string().trim().email().max(255)
+})
 
 export default defineEventHandler(async (event) => {
   await requireCurrentUser(event)
-  const query = getQuery(event)
-  const email = query.email as string
-
-  if (!email) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'Email harus diisi.'
-    })
-  }
+  const query = parseWithZod(searchUserQuerySchema, getQuery(event))
 
   const [foundUser] = await db
     .select({
@@ -24,8 +21,8 @@ export default defineEventHandler(async (event) => {
       image: user.image
     })
     .from(user)
-    .where(eq(user.email, email.trim()))
+    .where(eq(user.email, query.email))
     .limit(1)
 
-  return { user: foundUser || null }
+  return ok({ user: foundUser || null })
 })

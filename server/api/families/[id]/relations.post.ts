@@ -3,6 +3,7 @@ import { parentChildRelations, marriages, familyUserRoles } from '../../../datab
 import { db } from '../../../utils/db'
 import { requireCurrentUser } from '../../../utils/session'
 import { eq, and } from 'drizzle-orm'
+import { assertMembersBelongToFamily, ok, parseUuidParam } from '../../../utils/api'
 
 const CreateRelationSchema = z.discriminatedUnion('type', [
   z.object({
@@ -22,15 +23,7 @@ const CreateRelationSchema = z.discriminatedUnion('type', [
 
 export default defineEventHandler(async (event) => {
   const user = await requireCurrentUser(event)
-  const familyId = getRouterParam(event, 'id')
-
-  if (!familyId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'Family ID tidak valid.'
-    })
-  }
+  const familyId = parseUuidParam(getRouterParam(event, 'id'), 'Family ID')
 
   // Check user permissions in familyUserRoles
   const roles = await db
@@ -57,6 +50,8 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, (data) => CreateRelationSchema.parse(data))
 
   if (body.type === 'PARENT_CHILD') {
+    await assertMembersBelongToFamily(familyId, [body.parentId, body.childId])
+
     const [relation] = await db
       .insert(parentChildRelations)
       .values({
@@ -67,8 +62,10 @@ export default defineEventHandler(async (event) => {
         parentRole: body.parentRole
       })
       .returning()
-    return { relation }
+    return ok({ relation })
   } else {
+    await assertMembersBelongToFamily(familyId, [body.partner1Id, body.partner2Id])
+
     const [marriage] = await db
       .insert(marriages)
       .values({
@@ -78,6 +75,6 @@ export default defineEventHandler(async (event) => {
         status: body.status
       })
       .returning()
-    return { marriage }
+    return ok({ marriage })
   }
 })

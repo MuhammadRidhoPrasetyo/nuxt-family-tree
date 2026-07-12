@@ -42,12 +42,20 @@ export async function requireCurrentUser(event: H3Event) {
     })
   }
 
+  if (dbUser.status !== 'ACTIVE') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Forbidden',
+      message: 'Akun pengguna tidak aktif.'
+    })
+  }
+
   return dbUser
 }
 
 export async function requireAdminUser(event: H3Event) {
   const currentUser = await requireCurrentUser(event)
-  if (currentUser.role !== 'ADMIN') {
+  if (currentUser.role !== 'ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',
@@ -56,5 +64,4 @@ export async function requireAdminUser(event: H3Event) {
   }
   return currentUser
 }
-
 

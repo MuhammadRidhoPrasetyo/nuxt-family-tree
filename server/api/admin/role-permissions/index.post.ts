@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { and, eq } from 'drizzle-orm'
 import { rolePermissions } from '../../../database/schema'
 import { db } from '../../../utils/db'
+import { ok, parseWithZod } from '../../../utils/api'
 import { requireAdminUser } from '../../../utils/session'
 
 const assignPermissionSchema = z.object({
@@ -12,18 +13,7 @@ const assignPermissionSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   await requireAdminUser(event)
-  const body = await readBody(event)
-  const result = assignPermissionSchema.safeParse(body)
-
-  if (!result.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'Input tidak valid.'
-    })
-  }
-
-  const { roleId, permissionId, action } = result.data
+  const { roleId, permissionId, action } = parseWithZod(assignPermissionSchema, await readBody(event))
 
   if (action === 'assign') {
     // Check if already exists
@@ -51,5 +41,5 @@ export default defineEventHandler(async (event) => {
       ))
   }
 
-  return { success: true }
+  return ok({ success: true })
 })

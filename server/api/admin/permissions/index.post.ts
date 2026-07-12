@@ -1,30 +1,22 @@
 import { z } from 'zod'
 import { permissions } from '../../../database/schema'
 import { db } from '../../../utils/db'
+import { ok, parseWithZod } from '../../../utils/api'
 import { requireAdminUser } from '../../../utils/session'
 
 const createPermissionSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().optional()
+  name: z.string().trim().min(1).max(100),
+  description: z.string().trim().max(500).optional()
 })
 
 export default defineEventHandler(async (event) => {
   await requireAdminUser(event)
-  const body = await readBody(event)
-  const result = createPermissionSchema.safeParse(body)
-
-  if (!result.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'Input tidak valid.'
-    })
-  }
+  const body = parseWithZod(createPermissionSchema, await readBody(event))
 
   const [newPermission] = await db.insert(permissions).values({
-    name: result.data.name.toLowerCase(),
-    description: result.data.description || null
+    name: body.name.toLowerCase(),
+    description: body.description || null
   }).returning()
 
-  return { permission: newPermission }
+  return ok({ permission: newPermission })
 })

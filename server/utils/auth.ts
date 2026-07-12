@@ -39,7 +39,9 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
-      console.info(`Verification email for ${user.email}: ${url}`)
+      if (process.env.NODE_ENV !== 'production') {
+        console.info(`Verification email for ${user.email}: ${url}`)
+      }
     }
   },
   databaseHooks: {

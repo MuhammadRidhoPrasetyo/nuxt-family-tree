@@ -1,30 +1,22 @@
 import { z } from 'zod'
 import { roles } from '../../../database/schema'
 import { db } from '../../../utils/db'
+import { ok, parseWithZod } from '../../../utils/api'
 import { requireAdminUser } from '../../../utils/session'
 
 const createRoleSchema = z.object({
-  name: z.string().min(1).max(50),
-  description: z.string().optional()
+  name: z.string().trim().min(1).max(50),
+  description: z.string().trim().max(500).optional()
 })
 
 export default defineEventHandler(async (event) => {
   await requireAdminUser(event)
-  const body = await readBody(event)
-  const result = createRoleSchema.safeParse(body)
-
-  if (!result.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'Input tidak valid.'
-    })
-  }
+  const body = parseWithZod(createRoleSchema, await readBody(event))
 
   const [newRole] = await db.insert(roles).values({
-    name: result.data.name.toUpperCase(),
-    description: result.data.description || null
+    name: body.name.toUpperCase(),
+    description: body.description || null
   }).returning()
 
-  return { role: newRole }
+  return ok({ role: newRole })
 })

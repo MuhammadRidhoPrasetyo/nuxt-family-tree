@@ -1,18 +1,13 @@
 import { requireCurrentUser } from '../../../../utils/session'
+import { ok, parseUuidParam, requireFamilyRole } from '../../../../utils/api'
+import { validateUploadedFile } from '../../../../utils/upload'
 import { promises as fs } from 'fs'
 import path from 'path'
 
 export default defineEventHandler(async (event) => {
   const user = await requireCurrentUser(event)
-  const familyId = getRouterParam(event, 'id')
-
-  if (!familyId) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'ID Keluarga tidak valid.'
-    })
-  }
+  const familyId = parseUuidParam(getRouterParam(event, 'id'), 'ID Keluarga')
+  await requireFamilyRole(familyId, user.id, ['OWNER', 'ADMIN', 'EDITOR'])
 
   const formData = await readMultipartFormData(event)
   if (!formData || formData.length === 0) {
@@ -32,25 +27,20 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-  if (!allowedMimeTypes.includes(file.type || '')) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'Format file tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP.'
-    })
-  }
+  const validatedFile = validateUploadedFile(file, {
+    allowedKinds: ['image'],
+    maxSize: 5 * 1024 * 1024
+  })
 
   const uploadDir = path.join(process.cwd(), 'app', 'public', 'uploads')
   await fs.mkdir(uploadDir, { recursive: true })
 
-  const fileExt = path.extname(file.filename) || '.jpg'
-  const newFilename = `${crypto.randomUUID()}${fileExt}`
+  const newFilename = `${crypto.randomUUID()}${validatedFile.extension}`
   const filePath = path.join(uploadDir, newFilename)
 
   await fs.writeFile(filePath, file.data)
 
-  return {
+  return ok({
     url: `/uploads/${newFilename}`
-  }
+  })
 })

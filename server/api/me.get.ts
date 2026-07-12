@@ -42,6 +42,10 @@ export default defineEventHandler(async (event) => {
     return { user: null }
   }
 
+  if (dbUser.status !== 'ACTIVE') {
+    return { user: null }
+  }
+
   return {
     user: {
       id: dbUser.id,

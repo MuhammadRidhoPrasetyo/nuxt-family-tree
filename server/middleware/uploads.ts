@@ -17,6 +17,13 @@ export default defineEventHandler(async (event) => {
   }
 
   const filename = decodeURIComponent(requestPath.replace('/uploads/', ''))
+  if (filename.startsWith('donation-proof-')) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Not Found'
+    })
+  }
+
   const uploadDirs = [
     path.resolve(process.cwd(), 'app', 'public', 'uploads'),
     path.resolve(process.cwd(), 'public', 'uploads')
@@ -39,6 +46,7 @@ export default defineEventHandler(async (event) => {
 
       const ext = path.extname(filePath).toLowerCase()
       setHeader(event, 'content-type', contentTypes[ext] || 'application/octet-stream')
+      setHeader(event, 'x-content-type-options', 'nosniff')
       setHeader(event, 'cache-control', 'public, max-age=31536000, immutable')
       return sendStream(event, createReadStream(filePath))
     } catch {

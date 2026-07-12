@@ -1,6 +1,8 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import { requireCurrentUser } from '../../utils/session'
+import { ok } from '../../utils/api'
+import { validateUploadedFile } from '../../utils/upload'
 
 export default defineEventHandler(async (event) => {
   await requireCurrentUser(event)
@@ -23,34 +25,20 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
-  if (!allowedMimeTypes.includes(file.type || '')) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'Format file tidak didukung. Gunakan JPG, PNG, WEBP, atau PDF.'
-    })
-  }
+  const validatedFile = validateUploadedFile(file, {
+    allowedKinds: ['image', 'pdf'],
+    maxSize: 5 * 1024 * 1024
+  })
 
-  const maxSize = 5 * 1024 * 1024
-  if (file.data.length > maxSize) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Bad Request',
-      message: 'Ukuran file maksimal 5MB.'
-    })
-  }
-
-  const uploadDir = path.join(process.cwd(), 'app', 'public', 'uploads')
+  const uploadDir = path.join(process.cwd(), 'storage', 'private', 'donation-proofs')
   await fs.mkdir(uploadDir, { recursive: true })
 
-  const fileExt = path.extname(file.filename) || '.jpg'
-  const newFilename = `donation-proof-${crypto.randomUUID()}${fileExt}`
+  const newFilename = `donation-proof-${crypto.randomUUID()}${validatedFile.extension}`
   const filePath = path.join(uploadDir, newFilename)
 
   await fs.writeFile(filePath, file.data)
 
-  return {
-    url: `/uploads/${newFilename}`
-  }
+  return ok({
+    url: `/api/donations/proofs/${newFilename}`
+  })
 })
