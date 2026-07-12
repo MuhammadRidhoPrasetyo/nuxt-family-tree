@@ -68,6 +68,7 @@ const edges = ref<any[]>([])
 const selectedNodePreferenceMode = ref<NodeViewMode | 'INHERIT'>('INHERIT')
 const savingNodePreference = ref(false)
 const nodePreferences = ref<NodePreference[]>([])
+const exportingTree = ref(false)
 
 const treePreferences = reactive<TreePreferences>({ ...defaultTreePreferences })
 
@@ -569,6 +570,312 @@ const deleteMember = async () => {
   }
 }
 
+const getExportNodeSize = (node: any) => {
+  const mode = node.data?.nodeViewMode as NodeViewMode
+  if (mode === 'COMPACT_MINIMAL') return { width: 224, height: 56 }
+  if (mode === 'DETAILED_PROFILE') return { width: 320, height: 260 }
+  if (mode === 'MEMORIAL_STYLE') return { width: 288, height: 270 }
+  return { width: 288, height: 112 }
+}
+
+const getExportNodeAccent = (member: any, settings: TreeNodeSettings) => {
+  if (!settings.colorByGender) return '#065f46'
+  if (member.gender === 'MALE') return '#3b82f6'
+  if (member.gender === 'FEMALE') return '#ec4899'
+  return '#a1a1aa'
+}
+
+const drawRoundedRect = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) => {
+  const r = Math.min(radius, width / 2, height / 2)
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.arcTo(x + width, y, x + width, y + height, r)
+  ctx.arcTo(x + width, y + height, x, y + height, r)
+  ctx.arcTo(x, y + height, x, y, r)
+  ctx.arcTo(x, y, x + width, y, r)
+  ctx.closePath()
+}
+
+const truncateCanvasText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
+  if (ctx.measureText(text).width <= maxWidth) return text
+  let value = text
+  while (value.length > 1 && ctx.measureText(`${value}...`).width > maxWidth) {
+    value = value.slice(0, -1)
+  }
+  return `${value}...`
+}
+
+const formatExportYear = (dateValue?: string | Date | null) => {
+  if (!dateValue) return ''
+  const date = new Date(dateValue)
+  if (Number.isNaN(date.getTime())) return ''
+  return String(date.getFullYear())
+}
+
+const getExportLifespan = (member: any) => {
+  const birthYear = formatExportYear(member.birthDate)
+  const deathYear = member.isAlive === false ? formatExportYear(member.deathDate) : 'Present'
+  if (birthYear && deathYear) return `${birthYear} - ${deathYear}`
+  if (birthYear) return `${birthYear} - ${member.isAlive === false ? '' : 'Present'}`
+  if (member.isAlive === false && deathYear) return `Wafat ${deathYear}`
+  return 'Tanggal belum tersedia'
+}
+
+const drawExportAvatar = (
+  ctx: CanvasRenderingContext2D,
+  member: any,
+  x: number,
+  y: number,
+  size: number,
+  accent: string
+) => {
+  ctx.save()
+  ctx.fillStyle = '#f4f4f5'
+  ctx.strokeStyle = accent
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.stroke()
+
+  const initials = String(member.fullName || '?')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part: string) => part[0]?.toUpperCase())
+    .join('') || '?'
+  ctx.fillStyle = '#52525b'
+  ctx.font = `700 ${Math.max(12, Math.floor(size * 0.32))}px Inter, Arial, sans-serif`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(initials, x + size / 2, y + size / 2)
+  ctx.restore()
+}
+
+const drawExportNode = (ctx: CanvasRenderingContext2D, node: any, offsetX: number, offsetY: number) => {
+  const { width, height } = getExportNodeSize(node)
+  const x = node.position.x + offsetX
+  const y = node.position.y + offsetY
+  const member = node.data || {}
+  const settings = member.nodeSettings || defaultTreePreferences
+  const accent = getExportNodeAccent(member, settings)
+  const mode = member.nodeViewMode as NodeViewMode
+
+  ctx.save()
+  ctx.shadowColor = 'rgba(15, 23, 42, 0.14)'
+  ctx.shadowBlur = 18
+  ctx.shadowOffsetY = 8
+  drawRoundedRect(ctx, x, y, width, height, mode === 'COMPACT_MINIMAL' ? 28 : 10)
+  ctx.fillStyle = '#ffffff'
+  ctx.fill()
+  ctx.shadowColor = 'transparent'
+  ctx.strokeStyle = '#e4e4e7'
+  ctx.lineWidth = 1
+  ctx.stroke()
+
+  if (mode === 'DETAILED_PROFILE') {
+    ctx.fillStyle = '#064e3b'
+    drawRoundedRect(ctx, x, y, width, 66, 10)
+    ctx.fill()
+    if (settings.showPhotos) drawExportAvatar(ctx, member, x + 24, y + 36, 64, accent)
+    ctx.fillStyle = '#0f172a'
+    ctx.font = '700 17px Inter, Arial, sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(truncateCanvasText(ctx, member.fullName || 'Tanpa Nama', width - 48), x + 24, y + 128)
+    ctx.fillStyle = '#71717a'
+    ctx.font = '12px Inter, Arial, sans-serif'
+    ctx.fillText(truncateCanvasText(ctx, member.birthPlace || getExportLifespan(member), width - 48), x + 24, y + 150)
+    ctx.strokeStyle = '#e4e4e7'
+    ctx.beginPath()
+    ctx.moveTo(x + 24, y + 172)
+    ctx.lineTo(x + width - 24, y + 172)
+    ctx.stroke()
+    ctx.fillStyle = '#52525b'
+    ctx.fillText(truncateCanvasText(ctx, member.occupation || 'Pekerjaan belum diisi', width - 48), x + 24, y + 200)
+    ctx.fillText(truncateCanvasText(ctx, member.education || 'Pendidikan belum diisi', width - 48), x + 24, y + 224)
+    ctx.fillText(truncateCanvasText(ctx, member.address || member.birthPlace || 'Lokasi belum tersedia', width - 48), x + 24, y + 248)
+  } else if (mode === 'MEMORIAL_STYLE') {
+    ctx.fillStyle = '#f8fafc'
+    drawRoundedRect(ctx, x + 14, y + 14, width - 28, height - 28, 4)
+    ctx.fill()
+    if (settings.showPhotos) drawExportAvatar(ctx, member, x + width / 2 - 36, y + 32, 72, accent)
+    ctx.fillStyle = '#3f3f46'
+    ctx.font = 'italic 22px Georgia, serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(truncateCanvasText(ctx, member.fullName || 'Tanpa Nama', width - 42), x + width / 2, y + 132)
+    ctx.fillStyle = '#71717a'
+    ctx.font = '700 11px Inter, Arial, sans-serif'
+    if (settings.showBirthDates) ctx.fillText(getExportLifespan(member).toUpperCase(), x + width / 2, y + 158)
+    ctx.strokeStyle = '#d4d4d8'
+    ctx.beginPath()
+    ctx.moveTo(x + width / 2 - 30, y + 178)
+    ctx.lineTo(x + width / 2 + 30, y + 178)
+    ctx.stroke()
+    ctx.font = 'italic 12px Georgia, serif'
+    ctx.fillText(truncateCanvasText(ctx, member.bio || 'A life that touches others goes on forever.', width - 48), x + width / 2, y + 210)
+  } else if (mode === 'COMPACT_MINIMAL') {
+    if (settings.showPhotos) drawExportAvatar(ctx, member, x + 8, y + 8, 40, accent)
+    ctx.fillStyle = '#0f172a'
+    ctx.font = '700 14px Inter, Arial, sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(truncateCanvasText(ctx, member.fullName || 'Tanpa Nama', width - 82), x + 58, y + 24)
+    ctx.fillStyle = '#71717a'
+    ctx.font = '10px Inter, Arial, sans-serif'
+    if (settings.showBirthDates) ctx.fillText(truncateCanvasText(ctx, getExportLifespan(member), width - 82), x + 58, y + 40)
+    ctx.fillStyle = accent
+    ctx.beginPath()
+    ctx.arc(x + width - 20, y + height / 2, 5, 0, Math.PI * 2)
+    ctx.fill()
+  } else {
+    ctx.fillStyle = accent
+    drawRoundedRect(ctx, x, y, width, 4, 2)
+    ctx.fill()
+    if (settings.showPhotos) drawExportAvatar(ctx, member, x + 18, y + 22, 56, accent)
+    ctx.fillStyle = '#0f172a'
+    ctx.font = '700 16px Inter, Arial, sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(truncateCanvasText(ctx, member.fullName || 'Tanpa Nama', width - 96), x + 88, y + 42)
+    ctx.fillStyle = '#71717a'
+    ctx.font = '12px Inter, Arial, sans-serif'
+    if (settings.showNicknames && member.nickname) ctx.fillText(truncateCanvasText(ctx, member.nickname, width - 96), x + 88, y + 61)
+    if (settings.showBirthDates) ctx.fillText(truncateCanvasText(ctx, getExportLifespan(member), width - 96), x + 88, y + 80)
+    ctx.fillStyle = '#f8fafc'
+    ctx.fillRect(x, y + height - 32, width, 32)
+    ctx.fillStyle = '#71717a'
+    ctx.font = '700 11px Inter, Arial, sans-serif'
+    ctx.fillText(truncateCanvasText(ctx, member.relationLabel || 'Anggota Keluarga', width - 32).toUpperCase(), x + 16, y + height - 12)
+  }
+
+  ctx.restore()
+}
+
+const getNodeCenter = (node: any, offsetX: number, offsetY: number, handle: 'top' | 'bottom' | 'left' | 'right') => {
+  const { width, height } = getExportNodeSize(node)
+  const x = node.position.x + offsetX
+  const y = node.position.y + offsetY
+  if (handle === 'top') return { x: x + width / 2, y }
+  if (handle === 'bottom') return { x: x + width / 2, y: y + height }
+  if (handle === 'left') return { x, y: y + height / 2 }
+  return { x: x + width, y: y + height / 2 }
+}
+
+const drawExportEdge = (ctx: CanvasRenderingContext2D, edge: any, nodeMap: Map<string, any>, offsetX: number, offsetY: number) => {
+  const source = nodeMap.get(edge.source)
+  const target = nodeMap.get(edge.target)
+  if (!source || !target) return
+
+  const isMarriage = edge.id?.startsWith('marriage-')
+  const sourceHandle = edge.sourceHandle?.includes('left') ? 'left' : edge.sourceHandle?.includes('right') ? 'right' : 'bottom'
+  const targetHandle = edge.targetHandle?.includes('left') ? 'left' : edge.targetHandle?.includes('right') ? 'right' : 'top'
+  const start = getNodeCenter(source, offsetX, offsetY, sourceHandle)
+  const end = getNodeCenter(target, offsetX, offsetY, targetHandle)
+
+  ctx.save()
+  ctx.strokeStyle = isMarriage ? '#10b981' : '#94a3b8'
+  ctx.lineWidth = isMarriage ? 3 : 2
+  ctx.beginPath()
+  ctx.moveTo(start.x, start.y)
+  if (isMarriage) {
+    ctx.lineTo(end.x, end.y)
+  } else {
+    const midY = start.y + Math.max(48, (end.y - start.y) / 2)
+    ctx.bezierCurveTo(start.x, midY, end.x, midY, end.x, end.y)
+  }
+  ctx.stroke()
+  ctx.restore()
+}
+
+const exportTreeAsPng = async () => {
+  if (!import.meta.client || exportingTree.value) return
+  if (!nodes.value.length) {
+    toast.add({ title: 'Tree masih kosong', description: 'Tambahkan anggota terlebih dahulu sebelum export.', color: 'warning' })
+    return
+  }
+
+  exportingTree.value = true
+  try {
+    const padding = 120
+    const bounds = nodes.value.reduce((acc, node) => {
+      const size = getExportNodeSize(node)
+      return {
+        minX: Math.min(acc.minX, node.position.x),
+        minY: Math.min(acc.minY, node.position.y),
+        maxX: Math.max(acc.maxX, node.position.x + size.width),
+        maxY: Math.max(acc.maxY, node.position.y + size.height)
+      }
+    }, { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity })
+
+    const exportWidth = Math.max(800, Math.ceil(bounds.maxX - bounds.minX + padding * 2))
+    const exportHeight = Math.max(600, Math.ceil(bounds.maxY - bounds.minY + padding * 2))
+    const maxCanvasSide = 14000
+    const scale = Math.min(2, maxCanvasSide / exportWidth, maxCanvasSide / exportHeight)
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.ceil(exportWidth * scale)
+    canvas.height = Math.ceil(exportHeight * scale)
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Canvas tidak tersedia.')
+
+    ctx.scale(scale, scale)
+    ctx.fillStyle = '#f8fafc'
+    ctx.fillRect(0, 0, exportWidth, exportHeight)
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.05)'
+    for (let x = 0; x < exportWidth; x += 24) {
+      for (let y = 0; y < exportHeight; y += 24) {
+        ctx.fillRect(x, y, 2, 2)
+      }
+    }
+
+    ctx.fillStyle = '#0f172a'
+    ctx.font = '700 26px Inter, Arial, sans-serif'
+    ctx.textAlign = 'left'
+    ctx.fillText(data.value?.family.name || 'Family Tree', 36, 52)
+    ctx.fillStyle = '#64748b'
+    ctx.font = '13px Inter, Arial, sans-serif'
+    ctx.fillText(`Exported from Keluarga Kita • ${new Date().toLocaleDateString('id-ID')}`, 36, 76)
+
+    const offsetX = padding - bounds.minX
+    const offsetY = padding - bounds.minY + 24
+    const nodeMap = new Map(nodes.value.map(node => [node.id, node]))
+    edges.value.forEach(edge => drawExportEdge(ctx, edge, nodeMap, offsetX, offsetY))
+    nodes.value.forEach(node => drawExportNode(ctx, node, offsetX, offsetY))
+
+    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png', 1))
+    if (!blob) throw new Error('Gagal membuat file PNG.')
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const safeName = (data.value?.family.slug || data.value?.family.name || 'family-tree')
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+    link.href = url
+    link.download = `${safeName || 'family-tree'}-${new Date().toISOString().slice(0, 10)}.png`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+
+    toast.add({ title: 'Export PNG berhasil', description: 'Seluruh tree tersimpan ke file PNG.', color: 'success' })
+  } catch (err: any) {
+    toast.add({
+      title: 'Gagal export PNG',
+      description: err?.message || 'Terjadi kesalahan saat membuat export.',
+      color: 'error'
+    })
+  } finally {
+    exportingTree.value = false
+  }
+}
+
 // Audit Logs
 const isAuditLogModalOpen = ref(false)
 const loadingAuditLogs = ref(false)
@@ -993,6 +1300,16 @@ const submitRelation = async () => {
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <UButton
+          icon="i-lucide-download"
+          color="neutral"
+          variant="outline"
+          :loading="exportingTree"
+          :disabled="!nodes.length"
+          @click="exportTreeAsPng"
+        >
+          Export PNG
+        </UButton>
         <UButton icon="i-lucide-user-plus" color="primary" @click="openCreateMode">
           Tambah Anggota
         </UButton>
