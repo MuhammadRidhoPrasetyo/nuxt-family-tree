@@ -123,7 +123,7 @@ const deleteRole = async (id: string, name: string) => {
               <p class="text-sm text-muted">{{ role.description || '-' }}</p>
             </div>
             <UButton
-              v-if="role.name !== 'USER' && role.name !== 'ADMIN' && role.name !== 'SUPER_ADMIN'"
+              v-if="role.name !== 'USER' && role.name !== 'ADMIN'"
               icon="i-lucide-trash-2"
               color="error"
               variant="ghost"

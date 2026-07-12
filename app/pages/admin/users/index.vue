@@ -10,7 +10,7 @@ type User = {
   email: string
   emailVerified: boolean
   image: string | null
-  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN'
+  role: 'USER' | 'ADMIN'
   status: 'ACTIVE' | 'SUSPENDED' | 'DELETED'
   createdAt: string
 }
@@ -26,8 +26,7 @@ const selectedRole = ref<string>('ALL')
 const roleFilterItems = [
   { label: 'Semua Role', value: 'ALL' },
   { label: 'User', value: 'USER' },
-  { label: 'Admin', value: 'ADMIN' },
-  { label: 'Super Admin', value: 'SUPER_ADMIN' }
+  { label: 'Admin', value: 'ADMIN' }
 ]
 
 const filteredUsers = computed(() => {
@@ -47,8 +46,7 @@ const filteredUsers = computed(() => {
 
 const roleBadgeColor = {
   USER: 'neutral',
-  ADMIN: 'primary',
-  SUPER_ADMIN: 'error'
+  ADMIN: 'primary'
 } as const
 
 const statusBadgeColor = {

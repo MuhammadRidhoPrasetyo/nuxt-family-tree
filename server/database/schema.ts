@@ -29,7 +29,13 @@ export const marriageStatusEnum = pgEnum('marriage_status', ['MARRIED', 'DIVORCE
 export const familyRoleEnum = pgEnum('family_role', ['OWNER', 'ADMIN', 'EDITOR', 'VIEWER'])
 export const invitationRoleEnum = pgEnum('invitation_role', ['EDITOR', 'VIEWER'])
 export const mediaTypeEnum = pgEnum('media_type', ['PHOTO', 'DOCUMENT', 'VIDEO', 'OTHER'])
-export const donationStatusEnum = pgEnum('donation_status', ['PENDING', 'PAID', 'FAILED', 'REFUNDED'])
+export const donationVerificationStatusEnum = pgEnum('donation_verification_status', [
+  'PENDING',
+  'UNDER_REVIEW',
+  'PAID',
+  'REJECTED'
+])
+export const donationPaymentMethodTypeEnum = pgEnum('donation_payment_method_type', ['BANK_TRANSFER', 'QRIS'])
 export const nodeViewModeEnum = pgEnum('node_view_mode', [
   'CLASSIC_CARD',
   'COMPACT_MINIMAL',
@@ -310,20 +316,48 @@ export const mediaFiles = pgTable('media_files', {
   index('media_files_uploaded_by_idx').on(table.uploadedBy)
 ])
 
+export const siteDonationSettings = pgTable('site_donation_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  type: donationPaymentMethodTypeEnum('type').notNull(),
+  providerName: varchar('provider_name', { length: 100 }),
+  accountName: varchar('account_name', { length: 150 }),
+  accountNumber: varchar('account_number', { length: 50 }),
+  qrImageUrl: text('qr_image_url'),
+  instructions: text('instructions'),
+  isActive: boolean('is_active').notNull().default(true),
+  createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow()
+}, (table) => [
+  index('site_donation_settings_type_idx').on(table.type),
+  index('site_donation_settings_is_active_idx').on(table.isActive)
+])
+
 export const donations = pgTable('donations', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: text('user_id').references(() => user.id, { onDelete: 'set null' }),
-  familyId: uuid('family_id').references(() => families.id, { onDelete: 'set null' }),
-  donorName: varchar('donor_name', { length: 150 }),
+  paymentMethodId: uuid('payment_method_id').references(() => siteDonationSettings.id, { onDelete: 'set null' }),
+  donorName: varchar('donor_name', { length: 150 }).notNull(),
   donorEmail: varchar('donor_email', { length: 255 }),
+  isAnonymous: boolean('is_anonymous').notNull().default(false),
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
   currency: varchar('currency', { length: 10 }).notNull().default('IDR'),
-  paymentProvider: varchar('payment_provider', { length: 50 }),
-  paymentReference: varchar('payment_reference', { length: 150 }),
-  status: donationStatusEnum('status').notNull().default('PENDING'),
+  transferSenderName: varchar('transfer_sender_name', { length: 150 }),
+  transferNote: text('transfer_note'),
+  proofFileUrl: text('proof_file_url'),
+  status: donationVerificationStatusEnum('status').notNull().default('PENDING'),
+  adminNote: text('admin_note'),
+  verifiedBy: text('verified_by').references(() => user.id, { onDelete: 'set null' }),
+  verifiedAt: timestamp('verified_at', { mode: 'date' }),
   paidAt: timestamp('paid_at', { mode: 'date' }),
-  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow()
-})
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow()
+}, (table) => [
+  index('donations_user_id_idx').on(table.userId),
+  index('donations_payment_method_id_idx').on(table.paymentMethodId),
+  index('donations_status_idx').on(table.status),
+  index('donations_created_at_idx').on(table.createdAt)
+])
 
 export const auditLogs = pgTable('audit_logs', {
   id: uuid('id').primaryKey().defaultRandom(),

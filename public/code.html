@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Keluarga Kita | Abadikan Silsilah Keluarga Anda, Gratis Selamanya</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .grain-texture {
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            opacity: 0.4;
+        }
+        .bento-card {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+        }
+        .bento-card:hover {
+            transform: translateY(-8px);
+        }
+        /* Custom tree line animation for hero */
+        .tree-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 3s ease-forward forwards;
+        }
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#fff8f5",
+                    "inverse-on-surface": "#f8efea",
+                    "on-secondary-fixed-variant": "#474744",
+                    "tertiary-fixed-dim": "#ffb693",
+                    "outline": "#747872",
+                    "tertiary": "#562205",
+                    "on-surface": "#1e1b18",
+                    "primary-fixed": "#d7e7d5",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed-dim": "#bbcbba",
+                    "secondary": "#5e5e5b",
+                    "on-surface-variant": "#434843",
+                    "surface-container": "#f5ece7",
+                    "surface-container-highest": "#e9e1dc",
+                    "secondary-container": "#e1dfdb",
+                    "on-tertiary-fixed-variant": "#703718",
+                    "on-secondary-fixed": "#1b1c19",
+                    "surface": "#fff8f5",
+                    "error": "#ba1a1a",
+                    "on-secondary-container": "#63635f",
+                    "on-primary-fixed-variant": "#3c4a3d",
+                    "primary-container": "#3e4c3f",
+                    "on-error": "#ffffff",
+                    "surface-container-high": "#efe6e2",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#34302c",
+                    "tertiary-fixed": "#ffdbcc",
+                    "surface-variant": "#e9e1dc",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#e4e2dd",
+                    "surface-tint": "#546254",
+                    "surface-bright": "#fff8f5",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#e1d8d4",
+                    "error-container": "#ffdad6",
+                    "outline-variant": "#c4c8c1",
+                    "secondary-fixed-dim": "#c8c6c2",
+                    "primary": "#283529",
+                    "on-background": "#1e1b18",
+                    "on-tertiary-container": "#f5a37d",
+                    "inverse-primary": "#bbcbba",
+                    "on-primary-container": "#acbcab",
+                    "on-primary": "#ffffff",
+                    "surface-container-low": "#fbf2ed",
+                    "on-tertiary-fixed": "#351000",
+                    "tertiary-container": "#72381a",
+                    "on-primary-fixed": "#121e14"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-lg": "48px",
+                    "margin-desktop": "40px",
+                    "margin-mobile": "16px",
+                    "stack-sm": "12px",
+                    "stack-md": "24px",
+                    "container-max": "1280px",
+                    "gutter": "24px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "display-lg": ["Playfair Display"],
+                    "headline-sm": ["Playfair Display"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Playfair Display"],
+                    "display-lg-mobile": ["Playfair Display"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-02em", "fontWeight": "700"}],
+                    "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "display-lg-mobile": ["36px", {"lineHeight": "44px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 max-w-container-max mx-auto bg-background/80 backdrop-blur-md shadow-sm">
+<div class="flex items-center gap-3">
+<img alt="Keluarga Kita Logo" class="h-10 w-10 object-contain rounded-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCww5kZHyGnpRtXHCGoGApDRpVdy9BbCZ6vfqzbA9fsCuk7xHbm8fEXKdn-bU-cKsaYHLWHak9XdfZNat54m2BL9pezJgBtXgdK5o83HVJiGGqCBBdkGxyy8GtGO-42nE1_tooF3g9uJBr8gZzbMC9HnZu_mzcUMvysWz9vcwIWGdQfN9UXbtfkEKADjrBczRa5vmMcXsCzpBFmSkr7hW4i-kNmwSW2thDjGL6KBNNqQzENRbdM_E2dTFYVKnLGYD7__9WrL70kGpEJ"/>
+<span class="text-headline-sm font-headline-sm text-primary">Heirloom</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-label-md font-label-md text-primary dark:text-primary-fixed-dim border-b-2 border-primary pb-1 hover:text-primary transition-colors" href="#">Features</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">How it Works</a>
+<a class="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">About Us</a>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-full text-label-md font-label-md hover:opacity-90 active:scale-95 transition-all">
+            Start Your Tree
+        </button>
+</nav>
+<main class="pt-24 overflow-x-hidden">
+<!-- Hero Section -->
+<section class="relative px-margin-mobile md:px-margin-desktop py-stack-lg max-w-container-max mx-auto grid grid-cols-1 lg:grid-cols-2 gap-stack-lg items-center">
+<!-- Decorative Grain -->
+<div class="absolute inset-0 pointer-events-none grain-texture"></div>
+<div class="relative z-10 text-center lg:text-left">
+<span class="inline-block bg-primary-fixed text-on-primary-fixed px-4 py-1.5 rounded-full text-label-sm font-label-sm mb-6">
+                    Gratis Selamanya • Tanpa Batasan
+                </span>
+<h1 class="text-display-lg-mobile md:text-display-lg font-display-lg text-primary mb-6 leading-tight">
+                    Abadikan Silsilah Keluarga Anda, <br class="hidden md:block"/> Gratis Selamanya.
+                </h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant mb-10 max-w-xl mx-auto lg:mx-0">
+                    Bangun pohon keluarga Anda tanpa batasan jumlah anggota, tanpa biaya tersembunyi, dan mudah digunakan untuk semua generasi.
+                </p>
+<div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+<button class="w-full sm:w-auto bg-primary text-on-primary px-8 py-4 rounded-full text-label-md font-label-md hover:shadow-lg transition-all active:scale-95">
+                        Mulai Buat Pohon Anda - Gratis
+                    </button>
+<button class="w-full sm:w-auto border border-primary text-primary px-8 py-4 rounded-full text-label-md font-label-md hover:bg-primary-fixed transition-all">
+                        Lihat Contoh Pohon
+                    </button>
+</div>
+<div class="mt-8 flex items-center justify-center lg:justify-start gap-4 text-on-surface-variant">
+<div class="flex -space-x-2">
+<img class="w-10 h-10 rounded-full border-2 border-background object-cover" data-alt="A small, soft-focused circular avatar portrait of an elderly smiling man in a high-key lit environment, consistent with a warm archival heirloom aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB38Tl3ssonSC3uVwHnva4IT5sB6O_eWD5KpsgT-41eOE2qyxhij1Hgy3xmX-bQRJ3A46Xls-yImLap0YXky-chXbeFwxXatt7A1KhnGxXNMbaF57_4Hcm53B3Lc0q5CcPt6iP9yarPTD3khGjSM5v8ceMvJljWXfAoIRs4ypLrairiB9sKaXpb9p_cU31-yHj10a-lfpHAXHgcgmdaTXS8RXi2o6zLX9yHdm-phfsfgk3Rf21cIQgy8FGPxz2TR19hYkJgfRhx7sZt"/>
+<img class="w-10 h-10 rounded-full border-2 border-background object-cover" data-alt="A small, soft-focused circular avatar portrait of a young woman with a warm expression, high-key lighting and a soft neutral background to match the modern heirloom brand style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAf17iFsFP30cX-IRsNHFoG5ELcJEAvCK2vg8T8zmTpsKn-NwLucszGyRRFI7XoJOVeFHldIBXKM8IEqRK3qAlmu0lVEUkF20gtys5X5-nl85sCIaeqJnqFW6Eyvx9l43i5rZO99KWWMbuitU_S6YgbWJYAzYOlHDtRgKUR9Yd8WUjxjRXi5XL648qxan3rXw6xVb10YNzAT7xNZfPXiSDOb66Er-ux3sYt4pwuQPkCLzRW_vJG6uu85jRI69rH_ANjXtvbXMakM0_n"/>
+<img class="w-10 h-10 rounded-full border-2 border-background object-cover" data-alt="A small, soft-focused circular avatar portrait of a child smiling, bright and warm lighting, professional photography style that feels archival and personal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXxk8f4oFl57I_W_oNbMYEGBtdRT4uNZVIy5ukn840Nv-N-mGZ1_CswEB1lEQCyD0zF5DWJ70t9WORa9tsHJZEqf90xK8WUv491mtHbbQxu3wIDC-TNxJTryIF2k6k4jrgGswo0UY8HHUz2hZIBjpiyEi4KDk_bolTQgITJmXF-LYqgFCHwFiejoq5jaPjuMfIQ2tPJ0m8p0SKqgsMy1MbeHhtR86B5123nNcRQdmhkobmoioeEpUcJvSsuJFiGvE3drnmMC1uj1W9"/>
+</div>
+<span class="text-label-sm font-label-sm">+10,000 Keluarga Bergabung</span>
+</div>
+</div>
+<div class="relative flex justify-center">
+<div class="relative w-full max-w-lg aspect-square bg-surface-container rounded-3xl overflow-hidden shadow-sm border border-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A beautifully composed, high-quality photograph of a multi-generational family sitting together in a sun-drenched, modern living room, looking at a large printed family tree and antique photographs. The lighting is warm and ethereal, conveying a sense of deep heritage, legacy, and digital warmth consistent with a modern heirloom style. The color palette features soft creams, deep sages, and terracotta accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDohRK18na3EVVQ-jZQzAS5dkg_gTjNkZZ4S9oyt02J4eMJ5CjLTvSzucdXp_bgZt4s-yx7ZZXem6Ba-1jtsOaaFSZlPjo3Xn_biBUn3VOG1ui0z8a4pCEscDJNbwat5l26uMSzmmZxTtchXbJwQnZP2FbVF_1FVhL8ZEQUbtF8oMpukT3XVdDKpTAZkVHIdhxLb56mrOfMslQDHK6ttw5NiR-LWy3VGAnWsKfY7ao_6mOsUN9Dz0FBi5VJ2pBCvL3s6Y-lLYpzVY-Q"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent"></div>
+</div>
+<!-- Floating Node Elements for visual interest -->
+<div class="absolute -top-6 -right-6 md:-right-12 bg-white p-4 rounded-xl shadow-lg border border-surface-container flex items-center gap-3 animate-bounce shadow-xl" style="animation-duration: 3s">
+<div class="w-8 h-8 bg-tertiary-fixed rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-fixed text-sm">person</span>
+</div>
+<div>
+<p class="text-label-sm font-label-sm text-on-surface">Kakek Buyut</p>
+<p class="text-[10px] text-on-surface-variant">1920 - 1995</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Section (Bento Style) -->
+<section class="bg-surface-container-low py-20 px-margin-mobile md:px-margin-desktop">
+<div class="max-w-container-max mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-headline-md font-headline-md text-primary mb-4">Dibuat untuk Warisan Abadi</h2>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-2xl mx-auto">
+                        Fitur-fitur terbaik kami dirancang untuk memastikan silsilah Anda tetap terjaga dengan aman dan dapat dinikmati oleh cucu-cucu Anda kelak.
+                    </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Feature Card 1 -->
+<div class="bento-card bg-surface-container-lowest p-8 rounded-[16px] border border-surface-container shadow-sm flex flex-col items-center text-center">
+<div class="w-16 h-16 bg-primary-fixed-dim rounded-2xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">all_inclusive</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-3">Tanpa Batasan</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                            Tambahkan anggota keluarga sebanyak yang Anda mau. Dari nenek moyang hingga generasi termuda, simpan semuanya di satu tempat.
+                        </p>
+</div>
+<!-- Feature Card 2 -->
+<div class="bento-card bg-surface-container-lowest p-8 rounded-[16px] border border-surface-container shadow-sm flex flex-col items-center text-center">
+<div class="w-16 h-16 bg-tertiary-fixed rounded-2xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-tertiary text-3xl">volunteer_activism</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-3">Gratis Selamanya</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                            Semua fitur utama dapat diakses tanpa biaya. Kami percaya bahwa sejarah keluarga adalah hak setiap individu.
+                        </p>
+</div>
+<!-- Feature Card 3 -->
+<div class="bento-card bg-surface-container-lowest p-8 rounded-[16px] border border-surface-container shadow-sm flex flex-col items-center text-center">
+<div class="w-16 h-16 bg-secondary-fixed rounded-2xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-secondary text-3xl">family_history</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-primary mb-3">Mudah Digunakan</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                            Antarmuka yang ramah untuk orang tua maupun anak muda. Navigasi intuitif yang terasa sehangat album foto fisik.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- How It Works Section -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-stack-lg items-center">
+<div class="order-2 lg:order-1">
+<div class="relative p-base">
+<!-- Abstract Tree Visualization Background -->
+<div class="absolute inset-0 flex items-center justify-center opacity-10">
+<svg fill="none" height="400" viewbox="0 0 400 400" width="400" xmlns="http://www.w3.org/2000/svg">
+<path class="tree-line" d="M200 350V50M200 150L100 100M200 200L300 150M200 250L120 280M200 300L280 320" stroke="currentColor" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+</div>
+<div class="space-y-gutter relative z-10">
+<div class="flex gap-6 items-start group">
+<div class="flex-shrink-0 w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center font-bold">1</div>
+<div>
+<h4 class="text-headline-sm font-headline-sm text-primary mb-1">Daftar Akun</h4>
+<p class="text-body-md font-body-md text-on-surface-variant">Buat profil Anda dalam hitungan detik. Cukup gunakan email atau media sosial.</p>
+</div>
+</div>
+<div class="flex gap-6 items-start group">
+<div class="flex-shrink-0 w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center font-bold">2</div>
+<div>
+<h4 class="text-headline-sm font-headline-sm text-primary mb-1">Masukkan Anggota</h4>
+<p class="text-body-md font-body-md text-on-surface-variant">Mulai dari diri Anda, lalu tambahkan orang tua, kakek-nenek, dan sanak saudara lainnya.</p>
+</div>
+</div>
+<div class="flex gap-6 items-start group">
+<div class="flex-shrink-0 w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center font-bold">3</div>
+<div>
+<h4 class="text-headline-sm font-headline-sm text-primary mb-1">Hubungkan Generasi</h4>
+<p class="text-body-md font-body-md text-on-surface-variant">Tautkan hubungan, unggah foto lama, dan lihat pohon keluarga Anda tumbuh mekar.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="order-1 lg:order-2 text-center lg:text-left">
+<h2 class="text-headline-md font-headline-md text-primary mb-6">Mulai dalam 3 Langkah Sederhana</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant mb-8">
+                        Kami menghilangkan kerumitan dalam mencatat sejarah keluarga. Dengan sistem seret-dan-lepas (drag-and-drop), membangun pohon keluarga terasa seperti menyusun puzzle yang penuh kenangan.
+                    </p>
+<div class="hidden lg:block h-64 rounded-2xl overflow-hidden shadow-sm border border-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist UI screenshot of a digital family tree software. The interface features warm cream backgrounds and sage green nodes. It shows a clear hierarchy of ancestors and descendants with small squircle avatars and elegant typography. The style is modern, editorial, and sophisticated, reflecting the Heritage and Roots design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkPvWDmCySpoDsPfWSLI6-QIdTeF8zREoluRViXdWcSAabUR5Dv8iAoWtui89e9hx6X_BrKUCtBQ9UHdd6K4Dem-TTPj93AuqKIZ_GzhHu4PTVIKR3j_3bZCPtq0c-RXslzWkc_HQzb8cz4gsYle1S-26qrQjT43ZBPF6jscO1eLFpN1VcK_dVuJGnzOe18RMawlxtle8cdC5qvli4rym0gRTNsaWMb9icTo07mNcK4BtLZ5aoXVuJdxlCXFqhRvOZXJ36SiXPB57R"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="px-margin-mobile md:px-margin-desktop py-24">
+<div class="max-w-4xl mx-auto bg-primary-container rounded-[32px] p-8 md:p-16 text-center text-on-primary relative overflow-hidden shadow-xl">
+<!-- Background Decoration -->
+<div class="absolute -bottom-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+<div class="absolute -top-20 -left-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+<h2 class="text-display-lg-mobile md:text-headline-md font-headline-md text-on-primary mb-6 relative z-10">Mulai perjalanan silsilah Anda hari ini.</h2>
+<p class="text-body-lg font-body-lg text-on-primary-container mb-10 max-w-2xl mx-auto relative z-10">
+                    Setiap keluarga memiliki cerita. Jangan biarkan cerita Anda memudar oleh waktu. Simpan, bagikan, dan lestarikan untuk selamanya.
+                </p>
+<button class="bg-background text-primary px-10 py-5 rounded-full text-label-md font-label-md hover:scale-105 transition-transform shadow-lg relative z-10">
+                    Buat Akun Gratis Sekarang
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-stack-lg px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-gutter max-w-container-max mx-auto bg-surface-container-highest border-t border-surface-container-highest mt-stack-lg">
+<div class="col-span-1 md:col-span-1">
+<div class="flex items-center gap-3 mb-6">
+<img alt="Logo" class="h-8 w-8 object-contain rounded-md grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCww5kZHyGnpRtXHCGoGApDRpVdy9BbCZ6vfqzbA9fsCuk7xHbm8fEXKdn-bU-cKsaYHLWHak9XdfZNat54m2BL9pezJgBtXgdK5o83HVJiGGqCBBdkGxyy8GtGO-42nE1_tooF3g9uJBr8gZzbMC9HnZu_mzcUMvysWz9vcwIWGdQfN9UXbtfkEKADjrBczRa5vmMcXsCzpBFmSkr7hW4i-kNmwSW2thDjGL6KBNNqQzENRbdM_E2dTFYVKnLGYD7__9WrL70kGpEJ"/>
+<span class="text-headline-sm font-headline-sm text-primary">Heirloom</span>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant mb-6">Melestarikan akar untuk menumbuhkan masa depan.</p>
+</div>
+<div class="space-y-4">
+<p class="text-label-md font-label-md text-primary">Navigasi</p>
+<ul class="space-y-2">
+<li><a class="text-label-sm font-label-sm text-on-surface-variant hover:underline transition-all" href="#">Fitur</a></li>
+<li><a class="text-label-sm font-label-sm text-on-surface-variant hover:underline transition-all" href="#">Cara Kerja</a></li>
+<li><a class="text-label-sm font-label-sm text-on-surface-variant hover:underline transition-all" href="#">Tentang Kami</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<p class="text-label-md font-label-md text-primary">Legal &amp; Privasi</p>
+<ul class="space-y-2">
+<li><a class="text-label-sm font-label-sm text-on-surface-variant hover:underline transition-all" href="#">Syarat &amp; Ketentuan</a></li>
+<li><a class="text-label-sm font-label-sm text-on-surface-variant hover:underline transition-all" href="#">Kebijakan Privasi</a></li>
+<li><a class="text-label-sm font-label-sm text-on-surface-variant hover:underline transition-all" href="#">Keamanan Data</a></li>
+</ul>
+</div>
+<div class="space-y-4">
+<p class="text-label-md font-label-md text-primary">Media Sosial</p>
+<div class="flex gap-4">
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">face_nod</span></a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">photo_camera</span></a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">1k</span></a>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-8">© 2024 Heirloom Genealogy. All rights reserved.</p>
+</div>
+</footer>
+<!-- Micro-interaction Scripts -->
+<script>
+        // Simple scroll reveal
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('opacity-100', 'translate-y-0');
+                        entry.target.classList.remove('opacity-0', 'translate-y-10');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('section').forEach(section => {
+                section.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+                observer.observe(section);
+            });
+        });
+    </script>
+</body></html>

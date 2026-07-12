@@ -957,9 +957,15 @@ const submitRelation = async () => {
       toast.add({ title: 'Anak berhasil ditambahkan', color: 'success' })
     }
 
-    await refreshTree()
     isRelationModalOpen.value = false
     isSlideoverOpen.value = false
+    relationTypeToAdd.value = null
+    relationForm.fullName = ''
+    relationForm.gender = 'UNKNOWN'
+    relationForm.fatherName = ''
+    relationForm.motherName = ''
+    relationForm.selectedPartnerId = ''
+    await refreshTree()
   } catch (err: any) {
     toast.add({ title: 'Gagal menambahkan relasi', description: err?.message, color: 'error' })
   } finally {

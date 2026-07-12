@@ -1,3 +1,6 @@
+import { eq } from 'drizzle-orm'
+import { user } from '../database/schema'
+import { db } from './db'
 import { auth } from './auth'
 
 type H3Event = Parameters<Parameters<typeof defineEventHandler>[0]>[0]
@@ -25,19 +28,33 @@ export async function requireCurrentUser(event: H3Event) {
     })
   }
 
-  return session.user
+  const [dbUser] = await db
+    .select()
+    .from(user)
+    .where(eq(user.id, session.user.id))
+    .limit(1)
+
+  if (!dbUser) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized',
+      message: 'Akun pengguna tidak ditemukan.'
+    })
+  }
+
+  return dbUser
 }
 
 export async function requireAdminUser(event: H3Event) {
-  const user = await requireCurrentUser(event) as any
-  if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+  const currentUser = await requireCurrentUser(event)
+  if (currentUser.role !== 'ADMIN') {
     throw createError({
       statusCode: 403,
       statusMessage: 'Forbidden',
       message: 'Hanya admin yang dapat mengakses resource ini.'
     })
   }
-  return user
+  return currentUser
 }
 
 

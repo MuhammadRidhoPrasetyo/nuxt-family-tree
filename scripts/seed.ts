@@ -128,24 +128,12 @@ async function main() {
       })
     }
 
-    // Seed user role mapping
-    const [existingUserRole] = await db
-      .select()
-      .from(userRoles)
-      .where(and(
-        eq(userRoles.userId, userId),
-        eq(userRoles.roleId, targetRoleId)
-      ))
-      .limit(1)
-
-    if (!existingUserRole) {
-      // Clear previous roles first (assuming 1 main role for simplicity)
-      await db.delete(userRoles).where(eq(userRoles.userId, userId))
-      await db.insert(userRoles).values({
-        userId,
-        roleId: targetRoleId
-      })
-    }
+    // Force a single global role mapping every seed run
+    await db.delete(userRoles).where(eq(userRoles.userId, userId))
+    await db.insert(userRoles).values({
+      userId,
+      roleId: targetRoleId
+    })
 
     return userId
   }
@@ -153,7 +141,9 @@ async function main() {
   // Seed both users
   if (adminRole && userRole) {
     const adminUserId = await seedUserRecord(seedAdmin, adminRole.id)
+    console.info(`Assigned ADMIN role to ${seedAdmin.email}`)
     const regularUserId = await seedUserRecord(seedUser, userRole.id)
+    console.info(`Assigned USER role to ${seedUser.email}`)
 
     // Seed Family Tree owned by Admin
     console.info('Seeding family tree...')

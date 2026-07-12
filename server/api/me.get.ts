@@ -1,4 +1,7 @@
+import { eq } from 'drizzle-orm'
+import { user } from '../database/schema'
 import { auth } from '../utils/auth'
+import { db } from '../utils/db'
 
 export default defineEventHandler(async (event) => {
   const headers = new Headers()
@@ -21,20 +24,33 @@ export default defineEventHandler(async (event) => {
     return { user: null }
   }
 
-  const user = session.user as typeof session.user & {
-    role?: string
-    status?: string
+  const [dbUser] = await db
+    .select({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      image: user.image,
+      role: user.role,
+      status: user.status
+    })
+    .from(user)
+    .where(eq(user.id, session.user.id))
+    .limit(1)
+
+  if (!dbUser) {
+    return { user: null }
   }
 
   return {
     user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      emailVerified: Boolean(user.emailVerified),
-      image: user.image ?? null,
-      role: user.role ?? 'USER',
-      status: user.status ?? 'ACTIVE'
+      id: dbUser.id,
+      name: dbUser.name,
+      email: dbUser.email,
+      emailVerified: Boolean(dbUser.emailVerified),
+      image: dbUser.image ?? null,
+      role: dbUser.role,
+      status: dbUser.status
     }
   }
 })

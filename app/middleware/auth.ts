@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware(async () => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const currentUser = useCurrentUser()
 
   if (!currentUser.value) {
@@ -11,5 +11,9 @@ export default defineNuxtRouteMiddleware(async () => {
 
   if (!currentUser.value) {
     return navigateTo('/login')
+  }
+
+  if (currentUser.value.role === 'ADMIN') {
+    return navigateTo('/admin')
   }
 })

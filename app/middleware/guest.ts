@@ -10,7 +10,6 @@ export default defineNuxtRouteMiddleware(async () => {
   }
 
   if (currentUser.value) {
-    return navigateTo('/dashboard')
+    return navigateTo(currentUser.value.role === 'ADMIN' ? '/admin' : '/dashboard')
   }
 })
-

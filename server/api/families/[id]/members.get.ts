@@ -1,5 +1,6 @@
 import { eq, and, isNull } from 'drizzle-orm'
 import {
+  families,
   familyMembers,
   familyTreeNodePreferences,
   familyTreePreferences,
@@ -10,6 +11,40 @@ import {
 } from '../../../database/schema'
 import { db } from '../../../utils/db'
 import { requireCurrentUser } from '../../../utils/session'
+
+type NodeViewMode = 'CLASSIC_CARD' | 'COMPACT_MINIMAL' | 'DETAILED_PROFILE' | 'MEMORIAL_STYLE'
+
+type TreePreferencesResponse = {
+  id?: string
+  familyId?: string
+  userId?: string
+  nodeViewMode: NodeViewMode
+  showPhotos: boolean
+  showBirthDates: boolean
+  showNicknames: boolean
+  colorByGender: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+const defaultTreePreferences: TreePreferencesResponse = {
+  nodeViewMode: 'CLASSIC_CARD',
+  showPhotos: true,
+  showBirthDates: true,
+  showNicknames: true,
+  colorByGender: true
+}
+
+const isMissingPreferenceSchemaError = (error: unknown) => {
+  const candidate = error as { code?: string, cause?: { code?: string }, message?: string }
+  return (
+    candidate?.code === '42P01' ||
+    candidate?.cause?.code === '42P01' ||
+    candidate?.message?.includes('family_tree_preferences') ||
+    candidate?.message?.includes('family_tree_node_preferences') ||
+    candidate?.message?.includes('node_view_mode')
+  )
+}
 
 export default defineEventHandler(async (event) => {
   const user = await requireCurrentUser(event)
@@ -23,19 +58,63 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check user permissions in familyUserRoles
-  const roles = await db
-    .select()
-    .from(familyUserRoles)
-    .where(
-      and(
-        eq(familyUserRoles.familyId, familyId),
-        eq(familyUserRoles.userId, user.id)
-      )
-    )
+  const [family] = await db
+    .select({
+      id: families.id,
+      ownerUserId: families.ownerUserId
+    })
+    .from(families)
+    .where(and(
+      eq(families.id, familyId),
+      isNull(families.deletedAt)
+    ))
     .limit(1)
 
-  const userRole = roles[0]
+  if (!family) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Not Found',
+      message: 'Family tree tidak ditemukan.'
+    })
+  }
+
+  // Check user permissions in familyUserRoles, but always allow the owner.
+  let [userRole] = await db
+    .select()
+    .from(familyUserRoles)
+    .where(and(
+      eq(familyUserRoles.familyId, familyId),
+      eq(familyUserRoles.userId, user.id)
+    ))
+    .limit(1)
+
+  if (!userRole && family.ownerUserId === user.id) {
+    await db
+      .insert(familyUserRoles)
+      .values({
+        familyId,
+        userId: user.id,
+        role: 'OWNER'
+      })
+      .onConflictDoNothing()
+
+    const [ownerRole] = await db
+      .select()
+      .from(familyUserRoles)
+      .where(and(
+        eq(familyUserRoles.familyId, familyId),
+        eq(familyUserRoles.userId, user.id)
+      ))
+      .limit(1)
+
+    userRole = ownerRole || {
+      id: '',
+      familyId,
+      userId: user.id,
+      role: 'OWNER' as const,
+      createdAt: new Date()
+    }
+  }
 
   if (!userRole) {
     throw createError({
@@ -55,10 +134,17 @@ export default defineEventHandler(async (event) => {
   let privacy = existingSettings[0]
 
   if (!privacy) {
-    const [newSettings] = await db
+    await db
       .insert(privacySettings)
       .values({ familyId })
-      .returning()
+      .onConflictDoNothing()
+
+    const [newSettings] = await db
+      .select()
+      .from(privacySettings)
+      .where(eq(privacySettings.familyId, familyId))
+      .limit(1)
+
     privacy = newSettings
   }
 
@@ -69,22 +155,42 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  let [preferences] = await db
-    .select()
-    .from(familyTreePreferences)
-    .where(
-      and(
+  let preferences: TreePreferencesResponse = defaultTreePreferences
+  let nodePreferences: any[] = []
+
+  try {
+    let [storedPreferences] = await db
+      .select()
+      .from(familyTreePreferences)
+      .where(and(
         eq(familyTreePreferences.familyId, familyId),
         eq(familyTreePreferences.userId, user.id)
-      )
-    )
-    .limit(1)
+      ))
+      .limit(1)
 
-  if (!preferences) {
-    [preferences] = await db
-      .insert(familyTreePreferences)
-      .values({ familyId, userId: user.id })
-      .returning()
+    if (!storedPreferences) {
+      await db
+        .insert(familyTreePreferences)
+        .values({ familyId, userId: user.id })
+        .onConflictDoNothing()
+
+      const [createdPreferences] = await db
+        .select()
+        .from(familyTreePreferences)
+        .where(and(
+          eq(familyTreePreferences.familyId, familyId),
+          eq(familyTreePreferences.userId, user.id)
+        ))
+        .limit(1)
+
+      storedPreferences = createdPreferences
+    }
+
+    preferences = storedPreferences || defaultTreePreferences
+  } catch (error) {
+    if (!isMissingPreferenceSchemaError(error)) {
+      throw error
+    }
   }
 
   let members = await db
@@ -137,16 +243,20 @@ export default defineEventHandler(async (event) => {
     .where(eq(marriages.familyId, familyId)))
     .filter(m => visibleMemberIds.has(m.partner1Id) && visibleMemberIds.has(m.partner2Id))
 
-  const nodePreferences = (await db
-    .select()
-    .from(familyTreeNodePreferences)
-    .where(
-      and(
+  try {
+    nodePreferences = (await db
+      .select()
+      .from(familyTreeNodePreferences)
+      .where(and(
         eq(familyTreeNodePreferences.familyId, familyId),
         eq(familyTreeNodePreferences.userId, user.id)
-      )
-    ))
-    .filter(preference => visibleMemberIds.has(preference.memberId))
+      )))
+      .filter(preference => visibleMemberIds.has(preference.memberId))
+  } catch (error) {
+    if (!isMissingPreferenceSchemaError(error)) {
+      throw error
+    }
+  }
 
   return {
     members,

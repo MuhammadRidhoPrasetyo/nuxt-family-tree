@@ -6,6 +6,7 @@ definePageMeta({
 
 const toast = useToast()
 const authClient = useAuthClient()
+const currentUser = useCurrentUser()
 const loading = ref(false)
 const form = reactive({
   email: '',
@@ -19,7 +20,7 @@ const login = async () => {
     const { error } = await authClient.signIn.email({
       email: form.email,
       password: form.password,
-      callbackURL: '/dashboard'
+      callbackURL: '/admin'
     })
 
     if (error) {
@@ -27,7 +28,12 @@ const login = async () => {
       return
     }
 
-    await navigateTo('/dashboard')
+    const { data } = await useFetch<{ user: CurrentUser | null }>('/api/me', {
+      credentials: 'include'
+    })
+    currentUser.value = data.value?.user ?? null
+
+    await navigateTo(currentUser.value?.role === 'ADMIN' ? '/admin' : '/dashboard')
   } catch (error: any) {
     toast.add({
       title: 'Login gagal',
@@ -42,7 +48,7 @@ const login = async () => {
 const loginWithGoogle = async () => {
   await authClient.signIn.social({
     provider: 'google',
-    callbackURL: '/dashboard'
+    callbackURL: '/admin'
   })
 }
 </script>

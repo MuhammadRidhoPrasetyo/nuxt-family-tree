@@ -5,15 +5,8 @@ const currentUser = useCurrentUser()
 const route = useRoute()
 const open = ref(false)
 
-const links = computed<NavigationMenuItem[][]>(() => [
-  [
-    {
-      label: 'Ke Panel User',
-      icon: 'i-lucide-arrow-left',
-      to: '/dashboard'
-    }
-  ],
-  [
+const links = computed<NavigationMenuItem[][]>(() => {
+  const adminLinks: NavigationMenuItem[] = [
     {
       label: 'Dashboard Overview',
       icon: 'i-lucide-layout-dashboard',
@@ -45,7 +38,19 @@ const links = computed<NavigationMenuItem[][]>(() => [
       to: '/admin/role-permissions'
     }
   ]
-])
+
+  if (currentUser.value?.role === 'ADMIN') {
+    adminLinks.push({
+      label: 'Site Donation Settings',
+      icon: 'i-lucide-wallet',
+      to: '/admin/site-donation-settings'
+    })
+  }
+
+  return [
+    adminLinks
+  ]
+})
 
 const pageTitle = computed(() => {
   if (route.path === '/admin') return 'Dashboard Overview'
@@ -54,6 +59,7 @@ const pageTitle = computed(() => {
   if (route.path.startsWith('/admin/permissions')) return 'Kelola Permissions'
   if (route.path.startsWith('/admin/user-roles')) return 'Kelola User Roles'
   if (route.path.startsWith('/admin/role-permissions')) return 'Role Permissions'
+  if (route.path.startsWith('/admin/site-donation-settings')) return 'Site Donation Settings'
   return 'Admin Console'
 })
 </script>
@@ -84,16 +90,6 @@ const pageTitle = computed(() => {
         <UNavigationMenu
           :collapsed="collapsed"
           :items="links[0]"
-          orientation="vertical"
-          tooltip
-          popover
-        />
-
-        <USeparator class="my-2" />
-
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[1]"
           orientation="vertical"
           tooltip
           popover

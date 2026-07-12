@@ -5,8 +5,8 @@ const currentUser = useCurrentUser()
 const route = useRoute()
 const open = ref(false)
 
-const isAdmin = computed(() => {
-  return currentUser.value?.role === 'ADMIN' || currentUser.value?.role === 'SUPER_ADMIN'
+const canManageSiteDonationSettings = computed(() => {
+  return currentUser.value?.role === 'ADMIN'
 })
 
 const links = computed<NavigationMenuItem[][]>(() => {
@@ -30,16 +30,21 @@ const links = computed<NavigationMenuItem[][]>(() => {
       label: 'Undangan',
       icon: 'i-lucide-send',
       to: '/invitations'
+    },
+    {
+      label: 'Donasi',
+      icon: 'i-lucide-heart-handshake',
+      to: '/donations'
     }
   ]
 
   const footerLinks: NavigationMenuItem[] = []
 
-  if (isAdmin.value) {
-    footerLinks.push({
-      label: 'Admin Console',
-      icon: 'i-lucide-shield-alert',
-      to: '/admin/roles'
+  if (canManageSiteDonationSettings.value) {
+    mainLinks.push({
+      label: 'Site Donation Settings',
+      icon: 'i-lucide-wallet',
+      to: '/admin/site-donation-settings'
     })
   }
 
@@ -58,6 +63,8 @@ const pageTitle = computed(() => {
   if (route.path.startsWith('/families')) return 'Families'
   if (route.path.startsWith('/members')) return 'Anggota'
   if (route.path.startsWith('/invitations')) return 'Undangan'
+  if (route.path.startsWith('/donations')) return 'Donasi'
+  if (route.path.startsWith('/admin/site-donation-settings')) return 'Site Donation Settings'
   return 'Dashboard'
 })
 </script>
